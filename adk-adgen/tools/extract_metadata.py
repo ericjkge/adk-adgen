@@ -1,4 +1,9 @@
 import requests  
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
 def extract_metadata(url: str) -> dict:
     """
@@ -10,7 +15,7 @@ def extract_metadata(url: str) -> dict:
         dict: A dictionary containing the extracted metadata.
     """
 
-    url = "https://api.tavily.com/extract"
+    endpoint = "https://api.tavily.com/extract"
 
     payload = {
         "urls": url,
@@ -19,20 +24,22 @@ def extract_metadata(url: str) -> dict:
         "format": "markdown"
     }
     headers = {
-        "Authorization": "Bearer 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",
+        "Authorization": f"Bearer {TAVILY_API_KEY}",
         "Content-Type": "application/json"
     }
 
-    response = requests.request("POST", url, json=payload, headers=headers)
+    response = requests.request("POST", endpoint, json=payload, headers=headers)
     return response.json() 
 
-    # api_key = "fc-92ea1defd9df4883ae3731fe5a6701e3"
+    # load_dotenv()
+    # FIRECRAWL_API_KEY = os.getenv("FIRECRAWL_API_KEY")
+    # 
     # endpoint = "https://api.firecrawl.dev/v1/scrape"
-
+    #
     # response = requests.post(  
     #     endpoint,  
     #     json={"url": url},  
-    #     headers={"Authorization": f"Bearer {api_key}"}  
+    #     headers={"Authorization": f"Bearer {FIRECRAWL_API_KEY}"}  
     # )  
     # response.raise_for_status()  
     # return response.json()

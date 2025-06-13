@@ -1,4 +1,9 @@
 import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
 def search_competitors(query: str) -> dict:
     """
@@ -30,7 +35,7 @@ def search_competitors(query: str) -> dict:
         "country": None
     }
     headers = {
-        "Authorization": "Bearer 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",
+        "Authorization": f"Bearer {TAVILY_API_KEY}",
         "Content-Type": "application/json"
     }
 
