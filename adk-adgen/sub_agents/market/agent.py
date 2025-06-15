@@ -4,6 +4,8 @@ from ...tools.search_audience import search_audience
 from ...tools.search_competitors import search_competitors
 from ...tools.extract_metadata import extract_metadata
 
+# NOTE: output schema cannot be used with tools!
+
 market_agent = Agent(
     name="market_agent",
     model="gemini-2.0-flash",
@@ -47,6 +49,8 @@ market_agent = Agent(
         - price
         - image_url
         - product_url
+
+    NOTE: ONLY output the final results at the end of the workflow. Do NOT output intermediate results or tool calls.
     </WORKFLOW>
 
     """,
@@ -55,4 +59,5 @@ market_agent = Agent(
            search_competitors, 
            extract_metadata,
         ],
+    output_key="market_analysis",
 )
