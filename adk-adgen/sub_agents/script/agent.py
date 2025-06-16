@@ -9,13 +9,13 @@ class AVScript(BaseModel):
         description="A scene-by-scene visual description suitable for Veo 2 video generation. Use cinematic language to describe each scene clearly."
     )
 
-creative_agent = Agent(
-    name="creative_agent",
+script_agent = Agent(
+    name="script_agent",
     model="gemini-2.0-flash",
-    description="Creative agent",
+    description="Script agent",
     instruction="""
     <SYSTEM>
-    You are a creative agent.
+    You are a script agent.
 
     Your job is to generate and refine a script for a 30s video ad using:
     - {metadata} provided by the 'extraction_agent',
@@ -37,5 +37,5 @@ creative_agent = Agent(
     output_key="av_script",
 )
 
-# NOTE: root agent will probabilistically call creative agent for generation and refinement from frontend APIs that say smth like:
-# "call creative agent: script generation"
+# NOTE: root agent will probabilistically call script agent for generation and refinement from frontend APIs that say smth like:
+# "call script agent: script generation"
