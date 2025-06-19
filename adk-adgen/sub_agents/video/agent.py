@@ -1,14 +1,9 @@
-from google.adk.agents import Agent
-from google.adk.tools import LongRunningFunctionTool
-from ...tools.generate_a_roll import generate_a_roll
-from ...tools.generate_b_roll import generate_b_roll
+from google.adk.agents import ParallelAgent
+from ..aroll.agent import a_roll_agent
+from ..broll.agent import b_roll_agent
 
-video_agent = Agent(
-    name="video",
-    model="gemini-2.0-flash",
+video_agent = ParallelAgent(
+    name="video_agent",
     description="Video agent",
-    instruction="""
-    Call the generate_b_roll tool with the prompt: 'show the uploaded image spinning out'. Print out whatever is returned. Only attempt to generate video once.
-    """,
-    tools=[LongRunningFunctionTool(generate_a_roll), LongRunningFunctionTool(generate_b_roll)],
+    sub_agents=[a_roll_agent, b_roll_agent]
 )

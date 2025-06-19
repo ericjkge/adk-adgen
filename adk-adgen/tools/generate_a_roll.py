@@ -61,11 +61,12 @@ async def generate_a_roll(prompt: str, tool_context: ToolContext) -> str:
     status_url = f"https://api.heygen.com/v1/video_status.get?video_id={video_id}"
 
     # Step 3: Save video
-    max_attempts = 30
+    max_attempts = 60
 
     for _ in range(max_attempts):
         status_response = requests.get(status_url, headers=headers)
         status_data = status_response.json()
+        print(f"STATUS DATA {status_data}")
         status = status_data.get("data", {}).get("status")
 
         if status == "completed":
@@ -97,7 +98,7 @@ async def generate_a_roll(prompt: str, tool_context: ToolContext) -> str:
         elif status == "failed":
             # Handle the failure case with error info
             error = status_data.get("data", {}).get("error", {})
-            return f"Video generation failed: Error {error})"
+            return f"Video generation failed: Error {error}"
 
         # Wait 10 seconds before next check
         await asyncio.sleep(10)

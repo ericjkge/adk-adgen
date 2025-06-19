@@ -1,13 +1,52 @@
-import time
-import types
+from google.auth import default
+from google.auth.transport.requests import Request
+from google.genai import types
 import requests
 import os
 from dotenv import load_dotenv
 from google.adk.tools import ToolContext
+import asyncio
+from google.cloud import storage
 
 load_dotenv()
-PROJECT_ID = os.getenv("GOOGLE_PROJECT_ID")
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
+LOCATION = os.getenv("GOOGLE_CLOUD_LOCATION")
+MODEL_ID = "veo-2.0-generate-001"
+OUTPUT_STORAGE_URI = os.getenv("OUTPUT_STORAGE_URI")
+
+
+async def save_video(uri_link: str, tool_context: ToolContext) -> str:
+    try:  
+        if not uri_link.startswith("gs://"):  
+            return "Invalid GCS URI format"  
+          
+        # Remove gs:// prefix and split bucket/object  
+        path = uri_link[5:]  # Remove 'gs://'  
+        bucket_name, object_name = path.split('/', 1)  
+          
+        # Initialize GCS client  
+        client = storage.Client()  
+        bucket = client.bucket(bucket_name)  
+        blob = bucket.blob(object_name)  
+          
+        # Download video data  
+        video_data = blob.download_as_bytes()  
+          
+        # Create artifact part with video data  
+        artifact_part = types.Part(  
+            inline_data=types.Blob(  
+                mime_type='video/mp4',  # Adjust based on actual video format  
+                data=video_data  
+            )  
+        )  
+          
+        # Save as artifact  
+        await tool_context.save_artifact('generated_video', artifact_part)  
+          
+        return f"Video successfully downloaded and saved as artifact from {uri_link}"  
+          
+    except Exception as e:  
+        return f"Failed to download and save video: {str(e)}"
 
 
 async def generate_b_roll(prompt: str, tool_context: ToolContext) -> str:
@@ -25,50 +64,55 @@ async def generate_b_roll(prompt: str, tool_context: ToolContext) -> str:
     if not image:
         return "No base64 image found in state."
 
-    LOCATION = "us-central1"
-    MODEL_ID = "veo-2.0-generate-001"
+    creds, _ = default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
+    creds.refresh(Request())
+    access_token = creds.token
 
-    endpoint = f"https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}:predictLongRunning"
+    endpoint = (
+        f"https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}:predictLongRunning"
+    )
 
     headers = {
-        "Authorization": f"Bearer {GOOGLE_API_KEY}",
+        "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
     }
 
     payload = {
         "instances": [{"prompt": prompt, "image": image}],
-        "parameters": {
-            "durationSeconds": 8,  # Can pass more parameters here as needed (duration is required)
-        },
+        "parameters": {"durationSeconds": 8, "storageUri": OUTPUT_STORAGE_URI},
     }
 
     # Call Veo
     response = requests.post(endpoint, headers=headers, json=payload)
     if response.status_code != 200:
-        return f"Veo API call failed: {response.status_code} - {response.text}"
+        return f"Veo API call failed: {response.status_code}"
 
     response_data = response.json()
     operation = response_data["name"]
+    OPERATION_ID = operation.split("/")[-1]
 
-    poll_url = f"https://{LOCATION}-aiplatform.googleapis.com/v1/{operation}"
+
+    poll_url = (
+        f"https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}:fetchPredictOperation"
+    )
+
+    payload2 = {
+        "operationName": f"projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}/operations/{OPERATION_ID}"
+    }
 
     # Poll for 5 minutes
     for _ in range(30):
-        poll = requests.get(poll_url, headers=headers)
-        poll_data = poll.json()
-        if "response" in poll_data:
-            video_data = poll_data["response"]["video"]
-            video_bytes = video_data["bytesBase64Encoded"]
-            video_blob = types.Blob(
-                mime_type="video/mp4", data=video_bytes.encode("utf-8")
-            )
-            await tool_context.save_artifact(
-                "b_roll.mp4", types.Part(inline_data=video_blob)
-            )
-            return "B-roll video generated and saved as 'b_roll.mp4'."
-        elif "error" in poll_data:
-            return f"Veo generation failed: {poll_data['error']}"
+        poll = requests.post(poll_url, headers=headers, json=payload2)
+        if poll.status_code != 200:
+            return f"Polling failed: {poll.status_code} - {poll.text}"
 
-        time.sleep(10)
+        poll_data = poll.json()
+        print(f"POLL DATA {poll_data}")
+        if poll_data.get("done"):
+            uri_link = poll_data["response"]["videos"][0]["gcsUri"]
+            if uri_link:
+                return await save_video(uri_link, tool_context)
+
+        await asyncio.sleep(10)
 
     return "Video generation timed out after 5 minutes."
