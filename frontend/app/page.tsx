@@ -6,6 +6,7 @@ import { Dashboard } from "@/components/dashboard"
 import { CampaignCreator } from "@/components/campaign-creator"
 import { InfluencerDiscovery } from "@/components/influencer-discovery"
 import { ContentGenerator } from "@/components/content-generator"
+import { VideoGenerator } from "@/components/video-generator"
 import { Analytics } from "@/components/analytics"
 import { CampaignManager } from "@/components/campaign-manager"
 
@@ -22,6 +23,8 @@ export default function SupernovaApp() {
         return <InfluencerDiscovery />
       case "content":
         return <ContentGenerator />
+      case "video":
+        return <VideoGenerator />
       case "campaigns":
         return <CampaignManager />
       case "analytics":

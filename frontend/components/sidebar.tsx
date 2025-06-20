@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, Plus, Users, Sparkles, BarChart3, Zap, PlayCircle } from "lucide-react"
+import { LayoutDashboard, Plus, Users, Sparkles, BarChart3, Zap, PlayCircle, Video } from "lucide-react"
 
 interface SidebarProps {
   activeView: string
@@ -14,6 +14,7 @@ export function Sidebar({ activeView, setActiveView }: SidebarProps) {
     { id: "create", label: "Create Campaign", icon: Plus },
     { id: "influencers", label: "Find Influencers", icon: Users },
     { id: "content", label: "Generate Content", icon: Sparkles },
+    { id: "video", label: "Video Generator", icon: Video },
     { id: "campaigns", label: "Manage Campaigns", icon: PlayCircle },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
   ]
