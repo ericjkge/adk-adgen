@@ -27,6 +27,7 @@ TAVILY_API_KEY=INSERT_YOUR_TAVILY_API_KEY
 HEYGEN_API_KEY=INSERT_YOUR_HEYGEN_API_KEY
 GOOGLE_CLOUD_PROJECT=INSERT_YOUR_PROJECT_ID
 GOOGLE_CLOUD_LOCATION=us-central1
+OUTPUT_STORAGE_URI = INSERT_YOUR_GCS_URI
 ```
 
 ---
@@ -43,6 +44,7 @@ GOOGLE_CLOUD_LOCATION=us-central1
 gcloud auth login
 ```
 - Enable the [Vertex AI API](https://console.cloud.google.com/flows/enableapi?apiid=aiplatform.googleapis.com)
+- Select the project in [Google Cloud Storage](https://cloud.google.com/storage?hl=en)
 
 ### 🔹 Tavily API Key
 - Sign up at [tavily.com](https://www.tavily.com/)
@@ -53,3 +55,14 @@ gcloud auth login
 - Copy your API key into `.env` under `HEYGEN_API_KEY`
 
 NOTE: Alternatively, just complete Steps 1 and 3 from the [ADK Quickstart Guide](https://google.github.io/adk-docs/get-started/quickstart/#set-up-the-model)
+
+--
+
+## 4. Running the code
+
+For the backend, navigate to the adk-adgen root folder then run:
+
+```bash
+adk web
+```
+

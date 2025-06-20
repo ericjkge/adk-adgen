@@ -21,8 +21,8 @@ async def generate_a_roll(prompt: str, tool_context: ToolContext) -> str:
     """
 
     # Step 1: Get IDs and dimensions from state (assumed to be saved by root after pass from frontend)
-    avatar_id = tool_context.state.get("avatar_id", "Abigail_expressive_2024112501")
-    voice_id = tool_context.state.get("voice_id", "119caed25533477ba63822d5d1552d25")
+    avatar_id = tool_context.state.get("avatar_id", "Raul_sitting_casualsofawithipad_front")
+    voice_id = tool_context.state.get("voice_id", "beaa640abaa24c32bea33b280d2f5ea3")
     width = tool_context.state.get("width", 1280)
     height = tool_context.state.get("height", 720)
 

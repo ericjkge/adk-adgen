@@ -41,7 +41,7 @@ async def save_video(uri_link: str, tool_context: ToolContext) -> str:
         )  
           
         # Save as artifact  
-        await tool_context.save_artifact('generated_video', artifact_part)  
+        await tool_context.save_artifact('b_roll.mp4', artifact_part)  
           
         return f"Video successfully downloaded and saved as artifact from {uri_link}"  
           

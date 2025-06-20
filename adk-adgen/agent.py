@@ -3,6 +3,7 @@ from .sub_agents.analysis.agent import analysis_agent
 from .sub_agents.script.agent import script_agent
 from .sub_agents.video.agent import video_agent
 from .sub_agents.processing.agent import processing_agent
+from .tools.load_media import load_gcs_files_to_artifacts
 
 root_agent = Agent(
     name="manager",
@@ -28,5 +29,6 @@ root_agent = Agent(
         script_agent, 
         video_agent,
         processing_agent
-        ]
+        ],
+    tools=[load_gcs_files_to_artifacts]
 )
