@@ -50,7 +50,6 @@ export function VideoGenerator() {
   const [session, setSession] = useState<VideoGenerationSession | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [feedback, setFeedback] = useState("")
-  const [statusLogs, setStatusLogs] = useState<string[]>([])
   const [steps, setSteps] = useState<GenerationStep[]>([
     { id: 'extraction', name: 'Extract Product Data', status: 'pending' },
     { id: 'market_analysis', name: 'Market Research', status: 'pending' },
@@ -61,21 +60,6 @@ export function VideoGenerator() {
   ])
   
   const wsRef = useRef<WebSocket | null>(null)
-  const statusLogRef = useRef<HTMLDivElement>(null)
-
-  const addStatusLog = (message: string) => {
-    const timestamp = new Date().toLocaleTimeString()
-    setStatusLogs(prev => {
-      const newLogs = [...prev, `${timestamp}: ${message}`]
-      // Auto-scroll to bottom
-      setTimeout(() => {
-        if (statusLogRef.current) {
-          statusLogRef.current.scrollTop = statusLogRef.current.scrollHeight
-        }
-      }, 100)
-      return newLogs
-    })
-  }
 
   useEffect(() => {
     return () => {
@@ -86,39 +70,24 @@ export function VideoGenerator() {
   }, [])
 
   const connectWebSocket = (sessionId: string) => {
-    const ws = new WebSocket(`ws://localhost:8002/ws/${sessionId}`)
+    const ws = new WebSocket(`ws://localhost:8000/ws/${sessionId}`)
     
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data)
-      
-      // Add status message to logs
-      addStatusLog(`[${data.step || 'system'}] ${data.message}`)
-      
       updateStepStatus(data.step, data.status === 'completed' ? 'completed' : 'processing', data.message)
       
       if (data.status === 'awaiting_feedback' && data.script) {
         setSession(prev => prev ? { ...prev, script: data.script, awaiting_feedback: true } : null)
-        addStatusLog("📄 Script generated! Review and provide feedback.")
       }
       
       if (data.status === 'completed' && data.video_url) {
         setSession(prev => prev ? { ...prev, video_url: data.video_url, status: 'completed' } : null)
         setIsGenerating(false)
-        addStatusLog("✅ Video generation completed!")
       }
     }
     
     ws.onerror = (error) => {
       console.error('WebSocket error:', error)
-      addStatusLog("❌ WebSocket connection error")
-    }
-    
-    ws.onopen = () => {
-      addStatusLog("🔗 Connected to backend")
-    }
-    
-    ws.onclose = () => {
-      addStatusLog("🔌 Disconnected from backend")
     }
     
     wsRef.current = ws
@@ -134,13 +103,10 @@ export function VideoGenerator() {
     if (!productUrl.trim()) return
 
     setIsGenerating(true)
-    setStatusLogs([]) // Clear previous logs
     setSteps(prev => prev.map(step => ({ ...step, status: 'pending' })))
-    
-    addStatusLog("🚀 Starting video generation...")
 
     try {
-      const response = await fetch('http://localhost:8002/api/start-generation', {
+      const response = await fetch('http://localhost:8000/api/start-generation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -176,7 +142,7 @@ export function VideoGenerator() {
     if (!session || !feedback.trim()) return
 
     try {
-      const response = await fetch('http://localhost:8002/api/script-feedback', {
+      const response = await fetch('http://localhost:8000/api/script-feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -201,7 +167,7 @@ export function VideoGenerator() {
     if (!session) return
     
     try {
-      const response = await fetch('http://localhost:8002/api/script-feedback', {
+      const response = await fetch('http://localhost:8000/api/script-feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -326,9 +292,8 @@ export function VideoGenerator() {
             <CardContent>
               {session ? (
                 <Tabs defaultValue="progress" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4 bg-white/10">
+                  <TabsList className="grid w-full grid-cols-3 bg-white/10">
                     <TabsTrigger value="progress">Progress</TabsTrigger>
-                    <TabsTrigger value="logs">Status Log</TabsTrigger>
                     <TabsTrigger value="script" disabled={!session.script}>Script</TabsTrigger>
                     <TabsTrigger value="result" disabled={!session.video_url}>Result</TabsTrigger>
                   </TabsList>
@@ -357,32 +322,6 @@ export function VideoGenerator() {
                           </Badge>
                         </div>
                       ))}
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="logs" className="mt-6">
-                    <div 
-                      ref={statusLogRef}
-                      className="bg-black/20 rounded-lg p-4 h-96 overflow-y-auto font-mono text-sm border border-green-500/20"
-                    >
-                      <div className="text-green-400 mb-2 sticky top-0 bg-black/80 pb-1">
-                        🔍 Real-time Backend Status:
-                      </div>
-                      {statusLogs.length === 0 ? (
-                        <div className="text-gray-500">Waiting for status updates...</div>
-                      ) : (
-                        <div className="space-y-1">
-                          {statusLogs.map((log, index) => (
-                            <div key={index} className="text-gray-300 break-words leading-relaxed">
-                              {log}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <div className="mt-4 text-xs text-gray-500 flex items-center justify-between">
-                      <span>💡 This shows real-time messages from the ADK agents on the backend</span>
-                      <span className="text-green-400">🟢 Live</span>
                     </div>
                   </TabsContent>
 

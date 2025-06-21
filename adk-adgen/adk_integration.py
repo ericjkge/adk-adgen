@@ -9,7 +9,7 @@ from google.adk.sessions import InMemorySessionService
 from google.adk.artifacts import InMemoryArtifactService
 from google.adk.events import Event
 from google.genai import types
-from agent import root_agent
+from .agent import root_agent
 
 class ADKAgentRunner:
     """Helper class to run ADK agents programmatically"""

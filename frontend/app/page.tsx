@@ -2,42 +2,30 @@
 
 import { useState } from "react"
 import { Sidebar } from "@/components/sidebar"
-import { Dashboard } from "@/components/dashboard"
-import { CampaignCreator } from "@/components/campaign-creator"
-import { InfluencerDiscovery } from "@/components/influencer-discovery"
-import { ContentGenerator } from "@/components/content-generator"
-import { VideoGenerator } from "@/components/video-generator"
-import { Analytics } from "@/components/analytics"
-import { CampaignManager } from "@/components/campaign-manager"
+import { VideoGenerationWizard } from "@/components/video-generation-wizard"
+import { GalleryView } from "@/components/gallery-view"
+import { AvatarsView } from "@/components/avatars-view"
 
-export default function SupernovaApp() {
-  const [activeView, setActiveView] = useState("dashboard")
+export default function VibeApp() {
+  const [activeView, setActiveView] = useState("home")
 
   const renderView = () => {
     switch (activeView) {
-      case "dashboard":
-        return <Dashboard />
-      case "create":
-        return <CampaignCreator />
-      case "influencers":
-        return <InfluencerDiscovery />
-      case "content":
-        return <ContentGenerator />
-      case "video":
-        return <VideoGenerator />
-      case "campaigns":
-        return <CampaignManager />
-      case "analytics":
-        return <Analytics />
+      case "home":
+        return <VideoGenerationWizard />
+      case "gallery":
+        return <GalleryView />
+      case "avatars":
+        return <AvatarsView />
       default:
-        return <Dashboard />
+        return <VideoGenerationWizard />
     }
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="flex h-screen bg-black">
       <Sidebar activeView={activeView} setActiveView={setActiveView} />
-      <main className="flex-1 overflow-hidden">{renderView()}</main>
+      <main className="flex-1 overflow-y-auto">{renderView()}</main>
     </div>
   )
 }

@@ -8,8 +8,8 @@ from datetime import datetime
 import uuid
 
 # Import your existing ADK agent and integration helper
-from agent import root_agent
-from adk_integration import adk_runner
+from .agent import root_agent
+from .adk_integration import adk_runner
 
 app = FastAPI(title="ADK AdGen API", version="1.0.0")
 
