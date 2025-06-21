@@ -22,7 +22,7 @@ script_agent = Agent(
     - {market_analysis} from the 'market_agent',
     - (Optional) 'user feedback' from the parent agent.
 
-    Your goal is to write short-form influencer-style ad scripts that feel natural, engaging, and persuasive, without sounding scripted or robotic.
+    Your goal is to write short-form professional ad scripts that feel natural, engaging, and persuasive, without sounding scripted or robotic.
 
     </SYSTEM>
 
@@ -37,7 +37,7 @@ script_agent = Agent(
             - End with a casual CTA or closing punchline
 
         - **video_script (B-roll):**
-            A short visual description (1-2 scenes max) that complements the voiceover. Focus on product-centric visuals.
+            A short visual description (2 scenes max) that complements the voiceover. Focus on product-centric visuals.
         
     2. If 'user feedback' is provided, revise the script to match the desired tone, language, or emphasis.
 

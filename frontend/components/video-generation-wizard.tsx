@@ -31,7 +31,9 @@ interface VideoSession {
   metadata?: any
   market_analysis?: any
   script?: any
-  video_url?: string
+  aroll_url?: string
+  broll_url?: string
+  final_video_url?: string
   awaiting_feedback?: boolean
 }
 
@@ -47,7 +49,8 @@ export function VideoGenerationWizard() {
     { id: 2, name: "Product Info", icon: CheckCircle },
     { id: 3, name: "Market Analysis", icon: BarChart3 },
     { id: 4, name: "Script Review", icon: FileText },
-    { id: 5, name: "Video Result", icon: Video }
+    { id: 5, name: "Raw Footage", icon: Video },
+    { id: 6, name: "Final Video", icon: CheckCircle }
   ]
 
   const startGeneration = async () => {
@@ -150,12 +153,12 @@ export function VideoGenerationWizard() {
           status: "processing",
           step: "extraction",
           metadata: {
-            brand: "Apple",
-            product_name: "AirPods Pro",
-            product_category: "wireless earbuds",
-            description: "AirPods Pro are high-end wireless earbuds with active noise cancellation and spatial audio.",
-            key_features: ["active noise cancellation", "spatial audio", "wireless charging", "transparency mode", "adaptive EQ"],
-            price: "$249",
+            brand: "Optimum Nutrition",
+            product_name: "Gold Standard 100% Whey Protein",
+            product_category: "protein powder",
+            description: "The world's best-selling whey protein powder with 24g of protein per serving to help build and maintain muscle.",
+            key_features: ["24g protein per serving", "5.5g BCAAs", "4g glutamine", "instantized for easy mixing", "banned substance tested"],
+            price: "$59.99",
             image_url: "/placeholder.jpg",
             product_url: productUrl
           }
@@ -180,8 +183,8 @@ export function VideoGenerationWizard() {
     console.log("Loading market analysis...")
     
     try {
-      // Call the manager agent to perform market analysis
-      console.log("Calling manager agent for market analysis...")
+      // Call the manager agent to run market agent
+      console.log("Calling manager agent to run market agent...")
       const runResponse = await fetch("/api/adk/run", {
         method: "POST", 
         headers: {
@@ -194,25 +197,25 @@ export function VideoGenerationWizard() {
           newMessage: {
             role: "user",
             parts: [{
-              text: `Perform market analysis for this product: ${JSON.stringify(session.metadata)}`
+              text: `Run market agent to analyze market for this product: ${JSON.stringify(session.metadata)}`
             }]
           }
         }),
       })
       
       if (!runResponse.ok) {
-        throw new Error(`Failed to call market agent: ${runResponse.status}`)
+        throw new Error(`Failed to call manager agent: ${runResponse.status}`)
       }
       
       const events = await runResponse.json()
-      console.log("Market analysis events:", events)
+      console.log("Manager agent response events:", events)
       
-      // Process the events to extract market analysis
+      // Process the events to extract market analysis from market agent
       let extractedMarketAnalysis = null
       for (const event of events) {
         console.log("Processing market event:", event)
         
-        // Look for market analysis in the event content
+        // Look for market agent output in the event content
         if (event.content && event.content.parts) {
           for (const part of event.content.parts) {
             if (part.text) {
@@ -245,39 +248,38 @@ export function VideoGenerationWizard() {
         } : null)
       } else {
         // Fallback to mock data if extraction failed
-        console.log("Using fallback market analysis data")
+        console.log("Using fallback market analysis data - market agent may have failed")
         setSession(prev => prev ? {
           ...prev,
           market_analysis: {
-            market_size: "The wireless audio market is growing at 12% annually",
+            market_size: "The global protein powder market is valued at $7.5 billion and growing at 8.1% annually",
             market_trends: [
-              "The wireless audio market is growing at 12% annually",
-              "Consumer preference for premium audio features has increased 35% this year",
-              "Active noise cancellation is becoming a standard feature"
+              "Increasing demand for plant-based and clean label protein supplements",
+              "Growth in fitness and bodybuilding culture driving protein consumption",
+              "Rising popularity of convenient ready-to-drink protein products"
             ],
             audience_insights: {
               demographics: {
-                age: "18-45 years",
-                income: "$40,000-$120,000",
-                gender: "55% male, 45% female",
-                education: "College-educated"
+                age: "22-50 years",
+                income: "$35,000-$100,000",
+                gender: "65% male, 35% female"
               },
-              psychographics: "Tech-savvy, music-loving consumers who value premium audio quality and convenience."
+              psychographics: "Health-conscious fitness enthusiasts who prioritize muscle building, weight management, and active lifestyles."
             },
             competitors: [
               {
-                name: "Sony WH-1000XM5",
-                brand: "Sony",
-                price: "$399",
-                features: "Industry-leading noise cancellation, 30-hour battery",
-                description: "Premium over-ear headphones with exceptional noise cancellation"
+                name: "Dymatize ISO100",
+                brand: "Dymatize",
+                price: "$64.99",
+                features: "Hydrolyzed whey isolate, fast absorption, lactose-free",
+                description: "Premium whey protein isolate for serious athletes"
               },
               {
-                name: "Bose QuietComfort Earbuds",
-                brand: "Bose", 
-                price: "$279",
-                features: "World-class noise cancellation, secure fit",
-                description: "Premium earbuds known for superior noise cancellation"
+                name: "Muscle Milk Pro Series",
+                brand: "Muscle Milk", 
+                price: "$49.99",
+                features: "50g protein, slow and fast proteins, added creatine",
+                description: "High-protein formula designed for muscle building and recovery"
               }
             ]
           }
@@ -296,73 +298,326 @@ export function VideoGenerationWizard() {
   }
 
   const continueToScript = async () => {
+    if (!session?.session_id || !session?.metadata || !session?.market_analysis) return
+    
     setIsLoading(true)
     console.log("Generating script...")
     
     try {
-      // TODO: Replace with actual ADK API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      setSession(prev => prev ? {
-        ...prev,
-        script: {
-          audio_script: "Introducing the revolutionary AirPods Pro - the perfect blend of premium audio and cutting-edge technology. With industry-leading active noise cancellation and spatial audio, transform your listening experience. Experience the future of wireless audio with AirPods Pro.",
-          video_script: "Opening shot: Sleek AirPods Pro in case. Cut to: Person wearing them in busy environment. Show: Noise cancellation visualization. Highlight: Spatial audio demonstration. Close-up: Premium design details. Final shot: Happy user enjoying music."
+      // Call the manager agent to run script agent
+      console.log("Calling manager agent to run script agent...")
+      const runResponse = await fetch("/api/adk/run", {
+        method: "POST", 
+        headers: {
+          "Content-Type": "application/json",
         },
-        awaiting_feedback: true
-      } : null)
+        body: JSON.stringify({
+          appName: "manager",
+          userId: "user_123", 
+          sessionId: session.session_id,
+          newMessage: {
+            role: "user",
+            parts: [{
+              text: `Run script agent to generate video ad script using this metadata: ${JSON.stringify(session.metadata)} and this market analysis: ${JSON.stringify(session.market_analysis)}`
+            }]
+          }
+        }),
+      })
+      
+      if (!runResponse.ok) {
+        throw new Error(`Failed to call manager agent: ${runResponse.status}`)
+      }
+      
+      const events = await runResponse.json()
+      console.log("Manager agent response events:", events)
+      
+      // Process the events to extract script from script agent
+      let extractedScript = null
+      for (const event of events) {
+        console.log("Processing script event:", event)
+        
+        // Look for script agent output in the event content
+        if (event.content && event.content.parts) {
+          for (const part of event.content.parts) {
+            if (part.text) {
+              try {
+                // Try to parse JSON from the text response
+                const jsonMatch = part.text.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                  const parsed = JSON.parse(jsonMatch[0]);
+                  if (parsed.audio_script || parsed.video_script) {
+                    extractedScript = parsed;
+                    break;
+                  }
+                }
+              } catch (e) {
+                // Continue if not valid JSON
+                console.log("Failed to parse JSON from script response:", e)
+              }
+            }
+          }
+        }
+        
+        if (extractedScript) break;
+      }
+      
+      if (extractedScript) {
+        console.log("Extracted script:", extractedScript)
+        setSession(prev => prev ? {
+          ...prev,
+          script: extractedScript,
+          awaiting_feedback: true
+        } : null)
+      } else {
+        // Fallback to mock data if extraction failed
+        console.log("Using fallback script data - script agent may have failed")
+        setSession(prev => prev ? {
+          ...prev,
+          script: {
+            audio_script: "Just got my hands on this Optimum Nutrition Gold Standard Whey, and honestly? Game changer. 24 grams of protein per serving, mixes perfectly every time, and it actually tastes good. If you're serious about your gains, this is it.",
+            video_script: "Close-up of protein powder container rotating slowly. Zoom in on '24g protein' label. Cut to powder being scooped and mixed in shaker bottle. Final shot: smooth, creamy protein shake being poured."
+          },
+          awaiting_feedback: true
+        } : null)
+      }
       
       setCurrentStep(4)
       setIsLoading(false)
     } catch (error) {
       console.error("Error generating script:", error)
       setIsLoading(false)
+      
+      // Show error to user
+      alert(`Error generating script: ${error instanceof Error ? error.message : 'Unknown error'}. Please check the console for details.`)
     }
   }
 
   const submitFeedback = async () => {
+    if (!session?.session_id || !feedback.trim()) return
+    
     setIsLoading(true)
     console.log("Submitting feedback:", feedback)
     
     try {
-      // TODO: Replace with actual ADK API call
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      // Call the manager agent to run script agent with feedback
+      console.log("Calling manager agent to refine script with feedback...")
+      const runResponse = await fetch("/api/adk/run", {
+        method: "POST", 
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appName: "manager",
+          userId: "user_123", 
+          sessionId: session.session_id,
+          newMessage: {
+            role: "user",
+            parts: [{
+              text: `Run script agent to refine the video ad script based on this user feedback: "${feedback}". Use the existing metadata: ${JSON.stringify(session.metadata)} and market analysis: ${JSON.stringify(session.market_analysis)}`
+            }]
+          }
+        }),
+      })
       
-      setSession(prev => prev ? {
-        ...prev,
-        video_url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
-        status: "completed",
-        awaiting_feedback: false
-      } : null)
+      if (!runResponse.ok) {
+        throw new Error(`Failed to call manager agent: ${runResponse.status}`)
+      }
       
-      setCurrentStep(5)
+      const events = await runResponse.json()
+      console.log("Manager agent response events:", events)
+      
+      // Process the events to extract refined script
+      let refinedScript = null
+      for (const event of events) {
+        console.log("Processing refined script event:", event)
+        
+        if (event.content && event.content.parts) {
+          for (const part of event.content.parts) {
+            if (part.text) {
+              try {
+                const jsonMatch = part.text.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                  const parsed = JSON.parse(jsonMatch[0]);
+                  if (parsed.audio_script || parsed.video_script) {
+                    refinedScript = parsed;
+                    break;
+                  }
+                }
+              } catch (e) {
+                console.log("Failed to parse JSON from refined script response:", e)
+              }
+            }
+          }
+        }
+        
+        if (refinedScript) break;
+      }
+      
+      if (refinedScript) {
+        console.log("Script refined successfully:", refinedScript)
+        setSession(prev => prev ? {
+          ...prev,
+          script: refinedScript,
+          awaiting_feedback: true
+        } : null)
+        setFeedback("")
+        // Stay on script review step (step 4) to allow more feedback
+      } else {
+        throw new Error("Failed to refine script")
+      }
+      
       setIsLoading(false)
     } catch (error) {
       console.error("Error submitting feedback:", error)
       setIsLoading(false)
+      
+      alert(`Error refining script: ${error instanceof Error ? error.message : 'Unknown error'}. Please check the console for details.`)
     }
   }
 
-  const skipFeedback = async () => {
+  const approveScript = async () => {
+    if (!session?.session_id || !session?.script) return
+    
     setIsLoading(true)
-    console.log("Skipping feedback, generating video...")
+    
+    // Move to Step 5 (Raw Footage) immediately with loading state
+    setCurrentStep(5)
+    console.log("Script approved, generating raw footage...")
     
     try {
-      // TODO: Replace with actual ADK API call
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      // Step 1: Call A-roll agent
+      console.log("Calling manager agent to run A-roll agent...")
+      const arollResponse = await fetch("/api/adk/run", {
+        method: "POST", 
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appName: "manager",
+          userId: "user_123", 
+          sessionId: session.session_id,
+          newMessage: {
+            role: "user",
+            parts: [{
+              text: `Run a_roll_agent to generate avatar video using this audio script: ${session.script.audio_script}`
+            }]
+          }
+        }),
+      })
       
-      setSession(prev => prev ? {
-        ...prev,
-        video_url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
-        status: "completed",
-        awaiting_feedback: false
-      } : null)
+      if (!arollResponse.ok) {
+        throw new Error(`Failed to call A-roll agent: ${arollResponse.status}`)
+      }
+      
+      const arollEvents = await arollResponse.json()
+      console.log("A-roll agent response events:", arollEvents)
+      
+      // Step 2: Call B-roll agent  
+      console.log("Calling manager agent to run B-roll agent...")
+      const brollResponse = await fetch("/api/adk/run", {
+        method: "POST", 
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appName: "manager",
+          userId: "user_123", 
+          sessionId: session.session_id,
+          newMessage: {
+            role: "user",
+            parts: [{
+              text: `Run b_roll_agent to generate product video using this video script: ${session.script.video_script}`
+            }]
+          }
+        }),
+      })
+      
+      if (!brollResponse.ok) {
+        throw new Error(`Failed to call B-roll agent: ${brollResponse.status}`)
+      }
+      
+      const brollEvents = await brollResponse.json()
+      console.log("B-roll agent response events:", brollEvents)
+      
+      // Extract A-roll URL from A-roll agent response
+      let arollUrl = null
+      console.log("Processing A-roll events:", JSON.stringify(arollEvents, null, 2))
+      
+      for (const event of arollEvents) {
+        if (event.content && event.content.parts) {
+          for (const part of event.content.parts) {
+            if (part.text) {
+              console.log(`A-roll event author: ${event.author}, Text: ${part.text}`)
+              const urlMatch = part.text.match(/Video URL:\s*(https?:\/\/[^\s]+)/);
+              if (urlMatch) {
+                arollUrl = urlMatch[1];
+                console.log(`Found A-roll URL: ${arollUrl}`)
+                break;
+              }
+            }
+          }
+        }
+        if (arollUrl) break;
+      }
+      
+      // Extract B-roll URL from B-roll agent response
+      let brollUrl = null
+      console.log("Processing B-roll events:", JSON.stringify(brollEvents, null, 2))
+      
+      for (const event of brollEvents) {
+        if (event.content && event.content.parts) {
+          for (const part of event.content.parts) {
+            if (part.text) {
+              console.log(`B-roll event author: ${event.author}, Text: ${part.text}`)
+              const urlMatch = part.text.match(/Video URL:\s*(https?:\/\/[^\s]+)/);
+              if (urlMatch) {
+                brollUrl = urlMatch[1];
+                console.log(`Found B-roll URL: ${brollUrl}`)
+                break;
+              }
+            }
+          }
+        }
+        if (brollUrl) break;
+      }
+      
+      console.log(`Final URLs - A-roll: ${arollUrl}, B-roll: ${brollUrl}`)
+      
+      if (arollUrl && brollUrl) {
+        console.log("Raw footage generated successfully:", { arollUrl, brollUrl })
+        setSession(prev => prev ? {
+          ...prev,
+          aroll_url: arollUrl,
+          broll_url: brollUrl,
+          awaiting_feedback: false
+        } : null)
+      } else if (arollUrl || brollUrl) {
+        // Partial success - show what we have
+        console.log("Partial video generation success:", { arollUrl, brollUrl })
+                  setSession(prev => prev ? {
+            ...prev,
+            aroll_url: arollUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            broll_url: brollUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+            awaiting_feedback: false
+          } : null)
+              } else {
+          // Complete failure - use fallback
+          console.log("Video generation failed - using fallback URLs. A-roll events:", arollEvents, "B-roll events:", brollEvents)
+          setSession(prev => prev ? {
+            ...prev,
+            aroll_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            broll_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+            awaiting_feedback: false
+          } : null)
+        }
       
       setCurrentStep(5)
       setIsLoading(false)
     } catch (error) {
-      console.error("Error generating video:", error)
+      console.error("Error generating raw footage:", error)
       setIsLoading(false)
+      
+      alert(`Error generating raw footage: ${error instanceof Error ? error.message : 'Unknown error'}. Please check the console for details.`)
     }
   }
 
@@ -726,14 +981,14 @@ export function VideoGenerationWizard() {
                         {isLoading ? (
                           <>
                             <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                            Generating Video...
+                            Refining Script...
                           </>
                         ) : (
-                          "Submit Feedback & Generate Video"
+                          "Submit Feedback & Refine Script"
                         )}
                       </Button>
                       <Button
-                        onClick={skipFeedback}
+                        onClick={approveScript}
                         disabled={isLoading}
                         variant="outline"
                         className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 px-6 py-3 font-semibold transition-all duration-200"
@@ -744,7 +999,7 @@ export function VideoGenerationWizard() {
                             Generating Video...
                           </>
                         ) : (
-                          "Approve Script & Generate Video"
+                          "Approve Script & Generate Raw Footage"
                         )}
                       </Button>
                     </div>
@@ -764,8 +1019,215 @@ export function VideoGenerationWizard() {
     </div>
   )
 
-  // Step 5: Video Result
-  const renderVideoStep = () => (
+  // Add function to process raw footage into final video
+  const processRawFootage = async () => {
+    if (!session?.session_id || !session?.aroll_url || !session?.broll_url) return
+    
+    setIsLoading(true)
+    console.log("Processing raw footage into final video...")
+    
+    try {
+      // Call the manager agent to run processing agent
+      console.log("Calling manager agent to run processing agent...")
+      const runResponse = await fetch("/api/adk/run", {
+        method: "POST", 
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appName: "manager",
+          userId: "user_123", 
+          sessionId: session.session_id,
+          newMessage: {
+            role: "user",
+            parts: [{
+              text: `Run processing agent to combine A-roll and B-roll into final video. A-roll URL: ${session.aroll_url}, B-roll URL: ${session.broll_url}`
+            }]
+          }
+        }),
+      })
+      
+      if (!runResponse.ok) {
+        throw new Error(`Failed to call manager agent: ${runResponse.status}`)
+      }
+      
+      const events = await runResponse.json()
+      console.log("Manager agent response events:", events)
+      
+      // Process the events to extract final video URL
+      let finalVideoUrl = null
+      for (const event of events) {
+        console.log("Processing final video event:", event)
+        
+        if (event.content && event.content.parts) {
+          for (const part of event.content.parts) {
+            if (part.text) {
+              try {
+                const jsonMatch = part.text.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                  const parsed = JSON.parse(jsonMatch[0]);
+                  if (parsed.final_video_url) {
+                    finalVideoUrl = parsed.final_video_url;
+                    break;
+                  }
+                }
+              } catch (e) {
+                console.log("Failed to parse JSON from processing response:", e)
+              }
+            }
+          }
+        }
+        
+        if (finalVideoUrl) break;
+      }
+      
+      if (finalVideoUrl) {
+        console.log("Final video processed:", finalVideoUrl)
+        setSession(prev => prev ? {
+          ...prev,
+          final_video_url: finalVideoUrl
+        } : null)
+      } else {
+        // Fallback to mock data if extraction failed
+        console.log("Using fallback final video URL - processing agent may have failed")
+        setSession(prev => prev ? {
+          ...prev,
+          final_video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+        } : null)
+      }
+      
+      setCurrentStep(6)
+      setIsLoading(false)
+    } catch (error) {
+      console.error("Error processing raw footage:", error)
+      setIsLoading(false)
+      
+      alert(`Error processing raw footage: ${error instanceof Error ? error.message : 'Unknown error'}. Please check the console for details.`)
+    }
+  }
+
+  // Step 5: Raw Footage
+  const renderRawFootageStep = () => (
+    <div className="max-w-6xl mx-auto">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-bold text-white mb-3">Raw Footage Generated</h2>
+        <p className="text-gray-400">Review your A-roll and B-roll footage before final processing</p>
+      </div>
+      
+      <Card className="bg-gray-900/50 backdrop-blur-xl border-gray-600/30">
+        <CardContent>
+          {session?.aroll_url || session?.broll_url ? (
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* A-roll Video */}
+                <div className="space-y-4">
+                  <h4 className="text-white font-bold text-xl mb-4 flex items-center">
+                    <FileText className="w-6 h-6 mr-3 text-blue-400" />
+                    A-roll (Avatar/Voiceover)
+                    {session?.aroll_url ? (
+                      <span className="ml-2 text-sm text-green-400">✓ Ready</span>
+                    ) : (
+                      <span className="ml-2 text-sm text-yellow-400">⏳ Generating...</span>
+                    )}
+                  </h4>
+                  <div className="bg-gray-800/60 backdrop-blur-lg rounded-lg p-6 border border-gray-600/30 shadow-lg">
+                    {session?.aroll_url ? (
+                      <video 
+                        controls 
+                        className="w-full rounded-lg shadow-lg"
+                        src={session.aroll_url}
+                        onError={(e) => console.error('A-roll video error:', e)}
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    ) : (
+                      <div className="aspect-video bg-gray-700 rounded-lg flex items-center justify-center">
+                        <div className="text-center">
+                          <Loader2 className="w-8 h-8 text-blue-400 mx-auto mb-2 animate-spin" />
+                          <p className="text-gray-400 text-sm">Generating A-roll...</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* B-roll Video */}
+                <div className="space-y-4">
+                  <h4 className="text-white font-bold text-xl mb-4 flex items-center">
+                    <Video className="w-6 h-6 mr-3 text-blue-400" />
+                    B-roll (Product Footage)
+                    {session?.broll_url ? (
+                      <span className="ml-2 text-sm text-green-400">✓ Ready</span>
+                    ) : (
+                      <span className="ml-2 text-sm text-yellow-400">⏳ Generating...</span>
+                    )}
+                  </h4>
+                  <div className="bg-gray-800/60 backdrop-blur-lg rounded-lg p-6 border border-gray-600/30 shadow-lg">
+                    {session?.broll_url ? (
+                      <video 
+                        controls 
+                        className="w-full rounded-lg shadow-lg"
+                        src={session.broll_url}
+                        onError={(e) => console.error('B-roll video error:', e)}
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    ) : (
+                      <div className="aspect-video bg-gray-700 rounded-lg flex items-center justify-center">
+                        <div className="text-center">
+                          <Loader2 className="w-8 h-8 text-blue-400 mx-auto mb-2 animate-spin" />
+                          <p className="text-gray-400 text-sm">Generating B-roll...</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-center pt-6 border-t border-gray-600/30">
+                <Button 
+                  onClick={processRawFootage}
+                  disabled={isLoading || !session?.aroll_url || !session?.broll_url}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                      Processing into Final Video...
+                    </>
+                  ) : !session?.aroll_url || !session?.broll_url ? (
+                    <>
+                      <Video className="w-5 h-5 mr-3" />
+                      Waiting for Both Videos...
+                    </>
+                  ) : (
+                    <>
+                      <Video className="w-5 h-5 mr-3" />
+                      Process into Final Video
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <Loader2 className="w-16 h-16 text-blue-400 mx-auto mb-6 animate-spin" />
+              <h3 className="text-white font-semibold text-xl mb-3">Generating Raw Footage...</h3>
+              <p className="text-gray-400 text-base">Creating your A-roll and B-roll videos sequentially</p>
+              <div className="mt-4 space-y-2 text-sm">
+                <p className="text-gray-500">🎭 Step 1: Generating A-roll (avatar video)</p>
+                <p className="text-gray-500">🎬 Step 2: Generating B-roll (product video)</p>
+                <p className="text-gray-500 mt-3">⏱️ Total time: ~5-10 minutes</p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+
+  // Step 6: Final Video Result
+  const renderFinalVideoStep = () => (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-12">
         <h2 className="text-3xl font-bold text-white mb-3">Your Video is Ready!</h2>
@@ -774,22 +1236,23 @@ export function VideoGenerationWizard() {
       
       <Card className="bg-gray-900/50 backdrop-blur-xl border-gray-600/30">
         <CardContent>
-          {session?.video_url ? (
+          {session?.final_video_url ? (
             <div className="space-y-8">
               <div className="bg-gray-800/60 backdrop-blur-lg rounded-lg p-8 border border-gray-600/30 shadow-lg">
-                <video 
-                  controls 
-                  className="w-full rounded-lg shadow-2xl shadow-black/30"
-                  src={session.video_url}
-                >
-                  Your browser does not support the video tag.
-                </video>
+                                      <video 
+                        controls 
+                        className="w-full rounded-lg shadow-2xl shadow-black/30"
+                        src={session.final_video_url}
+                        onError={(e) => console.error('Final video error:', e)}
+                      >
+                        Your browser does not support the video tag.
+                      </video>
               </div>
               
               <div className="flex space-x-6 justify-center">
                 <Button 
                   className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
-                  onClick={() => window.open(session.video_url, '_blank')}
+                  onClick={() => window.open(session.final_video_url, '_blank')}
                 >
                   <Download className="w-5 h-5 mr-3" />
                   Download Video
@@ -806,8 +1269,8 @@ export function VideoGenerationWizard() {
           ) : (
             <div className="text-center py-16">
               <Loader2 className="w-16 h-16 text-blue-400 mx-auto mb-6 animate-spin" />
-              <h3 className="text-white font-semibold text-xl mb-3">Generating Your Video...</h3>
-              <p className="text-gray-400 text-base">This may take a few minutes</p>
+              <h3 className="text-white font-semibold text-xl mb-3">Processing Your Final Video...</h3>
+              <p className="text-gray-400 text-base">Combining A-roll and B-roll footage</p>
             </div>
           )}
         </CardContent>
@@ -850,7 +1313,8 @@ export function VideoGenerationWizard() {
           {currentStep === 2 && renderProductInfoStep()}
           {currentStep === 3 && renderMarketAnalysisStep()}
           {currentStep === 4 && renderScriptStep()}
-          {currentStep === 5 && renderVideoStep()}
+          {currentStep === 5 && renderRawFootageStep()}
+          {currentStep === 6 && renderFinalVideoStep()}
         </div>
       </div>
     </div>

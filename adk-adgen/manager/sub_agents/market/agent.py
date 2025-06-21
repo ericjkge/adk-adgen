@@ -83,46 +83,6 @@ market_agent = Agent(
       ]
     }
     </OUTPUT_FORMAT>
-
-    <EXAMPLE>
-    For a product like "Apple AirPods Pro", your output should look like:
-
-    {
-      "market_size": "The global wireless earbuds market was valued at $8.2 billion in 2023 and is projected to reach $15.8 billion by 2030, growing at a CAGR of 9.8%",
-      "market_trends": [
-        "Active noise cancellation is becoming a standard feature across price segments",
-        "Consumer preference for premium audio features has increased 35% this year",
-        "Integration with AI assistants and health monitoring features is driving adoption"
-      ],
-      "audience_insights": {
-        "demographics": {
-          "age": "18-45 years",
-          "income": "$40,000-$120,000", 
-          "gender": "55% male, 45% female"
-        },
-        "psychographics": "Tech-savvy, music-loving consumers who value premium audio quality, convenience, and seamless device integration"
-      },
-      "competitors": [
-        {
-          "name": "WH-1000XM5",
-          "brand": "Sony",
-          "price": "$399",
-          "features": "Industry-leading noise cancellation, 30-hour battery life, premium build quality",
-          "description": "Premium over-ear headphones with exceptional noise cancellation and audio quality",
-          "product_url": "https://www.sony.com/electronics/headband-headphones/wh-1000xm5"
-        },
-        {
-          "name": "QuietComfort Earbuds",
-          "brand": "Bose",
-          "price": "$279", 
-          "features": "World-class noise cancellation, secure fit, premium audio",
-          "description": "Premium true wireless earbuds known for superior noise cancellation",
-          "product_url": "https://www.bose.com/products/headphones/earbuds/quietcomfort-earbuds"
-        }
-      ]
-    }
-    </EXAMPLE>
-
     """,
     tools=[search_market, 
            search_audience,
