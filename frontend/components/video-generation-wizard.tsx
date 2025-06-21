@@ -527,23 +527,14 @@ export function VideoGenerationWizard() {
           if (event.content && event.content.parts) {
             for (const part of event.content.parts) {
               if (part.text) {
-                // Try multiple URL patterns that HeyGen might return
-                const urlPatterns = [
-                  /Video URL:\s*(https?:\/\/[^\s]+)/,  // "Video URL: https://..."
-                  /video is available at\s+(https?:\/\/[^\s]+)/,  // "video is available at https://..."
-                  /https:\/\/files2\.heygen\.ai\/[^\s]+/  // Direct HeyGen URL
-                ];
-                
-                for (const pattern of urlPatterns) {
-                  const urlMatch = part.text.match(pattern);
-                  if (urlMatch) {
-                    arollUrl = urlMatch[1] || urlMatch[0]; // Use capture group or full match
-                    console.log(`🎭 FOUND A-ROLL URL: ${arollUrl}`)
-                    console.log(`🎭 COPY THIS URL FOR FUTURE TESTING: ${arollUrl}`)
-                    break;
-                  }
+                // Look for A-roll URL in standard format
+                const urlMatch = part.text.match(/Video URL:\s*(https?:\/\/[^\s]+)/);
+                if (urlMatch) {
+                  arollUrl = urlMatch[1];
+                  console.log(`🎭 FOUND A-ROLL URL: ${arollUrl}`)
+                  console.log(`🎭 COPY THIS URL FOR FUTURE TESTING: ${arollUrl}`)
+                  break;
                 }
-                if (arollUrl) break;
               }
             }
           }
@@ -587,8 +578,8 @@ export function VideoGenerationWizard() {
           for (const part of event.content.parts) {
             if (part.text) {
               console.log(`B-roll event author: ${event.author}, Text: ${part.text}`)
-                              // Look for both signed URLs (https) and GCS URIs (gs)
-                const urlMatch = part.text.match(/Video URL:\s*((?:https?|gs):\/\/[^\s]+)/);
+              // Look for B-roll URL in standard format (supports both https and gs:// URLs)
+              const urlMatch = part.text.match(/Video URL:\s*((?:https?|gs):\/\/[^\s]+)/);
                 if (urlMatch) {
                   const rawUrl = urlMatch[1];
                   console.log(`Found B-roll URL: ${rawUrl}`)
@@ -1075,14 +1066,29 @@ export function VideoGenerationWizard() {
       const events = await runResponse.json()
       console.log("Processing agent response events:", events)
       
-      // Look for success message from processing agent
+      // Look for success message and video URL from processing agent
       let processingSuccess = false
+      let finalVideoUrl = null
+      
       for (const event of events) {
         if (event.content && event.content.parts) {
           for (const part of event.content.parts) {
             if (part.text && part.text.includes("✅ Video processed")) {
               processingSuccess = true
               console.log("Video processing completed successfully:", part.text)
+              
+              // Extract final video URL if present
+              const urlMatch = part.text.match(/Video URL:\s*((?:https?|gs):\/\/[^\s]+)/);
+              if (urlMatch) {
+                const rawUrl = urlMatch[1];
+                // Convert GCS URI to public HTTP URL if needed
+                if (rawUrl.startsWith('gs://')) {
+                  finalVideoUrl = rawUrl.replace('gs://', 'https://storage.googleapis.com/');
+                  console.log(`Found final video URL: ${finalVideoUrl}`)
+                } else {
+                  finalVideoUrl = rawUrl;
+                }
+              }
               break;
             }
           }
@@ -1091,12 +1097,10 @@ export function VideoGenerationWizard() {
       }
       
       if (processingSuccess) {
-        // For now, use a placeholder URL since the processed video is saved as ADK artifact
-        // In a real implementation, you'd need to convert the artifact to a public URL
         console.log("Final video processed successfully")
         setSession(prev => prev ? {
           ...prev,
-          final_video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" // Placeholder for processed video
+          final_video_url: finalVideoUrl || prev.broll_url || prev.aroll_url || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
         } : null)
       } else {
         console.log("Processing may have failed, using fallback video")
@@ -1352,7 +1356,7 @@ export function VideoGenerationWizard() {
                 {/* Video Stats */}
                 <div className="bg-gray-800/40 rounded-lg p-6 border border-gray-600/20">
                   <h4 className="text-white font-semibold text-lg mb-4">Video Details</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                     <div className="text-center">
                       <div className="text-blue-400 font-semibold">Format</div>
                       <div className="text-gray-300">MP4</div>
@@ -1368,6 +1372,10 @@ export function VideoGenerationWizard() {
                     <div className="text-center">
                       <div className="text-blue-400 font-semibold">B-roll</div>
                       <div className="text-gray-300">Veo 2</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-blue-400 font-semibold">Processing</div>
+                      <div className="text-gray-300">FFmpeg + GCS</div>
                     </div>
                   </div>
                 </div>

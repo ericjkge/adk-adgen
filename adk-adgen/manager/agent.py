@@ -29,8 +29,8 @@ root_agent = Agent(
     6. B-roll agent generates a product video using Veo 2.
     6. Processing agent finalizes the video.
 
-    Just respond with the output of the subagent you are calling. Do not interact with the user, as your responses will be
-    fed back to the wizard frontend, which has strict rules about how to handle your responses.
+    NOTE: You MUST respond with the exact output of the subagent you are calling. Do NOT interact additionally with the user, as your responses will be
+    fed back to the wizard frontend, which has strict regex rules about how to handle your responses.
     """,
     sub_agents=[
         analysis_agent, 

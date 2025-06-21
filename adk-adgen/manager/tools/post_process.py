@@ -4,6 +4,42 @@ import tempfile
 import json
 from pathlib import Path
 from google.genai import types
+from google.cloud import storage
+import os
+import uuid
+from dotenv import load_dotenv
+
+load_dotenv()
+OUTPUT_STORAGE_URI = os.getenv("OUTPUT_STORAGE_URI")
+
+async def upload_to_gcs(video_path: Path, tool_context: ToolContext) -> str | None:
+    """Upload processed video to GCS and return the public URI."""
+    try:
+        if not OUTPUT_STORAGE_URI:
+            return None
+            
+        # Parse bucket name from OUTPUT_STORAGE_URI (e.g., "gs://bucket-name/")
+        bucket_name = OUTPUT_STORAGE_URI.replace("gs://", "").rstrip("/")
+        
+        # Generate unique filename for processed video
+        unique_id = str(uuid.uuid4().int)[:15]  # Use first 15 digits of UUID
+        object_name = f"{unique_id}/processed_video.mp4"
+        
+        # Initialize GCS client and upload
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
+        blob = bucket.blob(object_name)
+        
+        # Upload the video file
+        blob.upload_from_filename(str(video_path))
+        
+        # Return GCS URI
+        gcs_uri = f"gs://{bucket_name}/{object_name}"
+        return gcs_uri
+        
+    except Exception as e:
+        print(f"Failed to upload to GCS: {str(e)}")
+        return None
 
 # Dynamic A-roll and B-roll alternation based on A-roll duration
 def get_video_duration(video_path: Path) -> float:
@@ -39,8 +75,15 @@ async def post_process(tool_context: ToolContext) -> str:
         b_path = temp_path / "b_roll.mp4"
         out_path = temp_path / "processed_video.mp4"
         
-        a_path.write_bytes(a_roll.inline_data.data)
-        b_path.write_bytes(b_roll.inline_data.data)
+        if a_roll.inline_data and a_roll.inline_data.data:
+            a_path.write_bytes(a_roll.inline_data.data)
+        else:
+            return "❌ A-roll data is missing"
+            
+        if b_roll.inline_data and b_roll.inline_data.data:
+            b_path.write_bytes(b_roll.inline_data.data)
+        else:
+            return "❌ B-roll data is missing"
         
         try:
             # Get video durations
@@ -84,11 +127,17 @@ async def post_process(tool_context: ToolContext) -> str:
             
             subprocess.run(ffmpeg_cmd, capture_output=True, text=True, check=True)
             
+            # Save as artifact (for backward compatibility)
             await tool_context.save_artifact("processed_video.mp4", types.Part(
                 inline_data=types.Blob(mime_type='video/mp4', data=out_path.read_bytes())
             ))
             
-            return f"✅ Video processed: A-roll ({a_duration:.1f}s) and B-roll ({b_duration:.1f}s) alternated dynamically."
+            # Upload to GCS for public access
+            gcs_uri = await upload_to_gcs(out_path, tool_context)
+            if gcs_uri:
+                return f"✅ Video processed: A-roll ({a_duration:.1f}s) and B-roll ({b_duration:.1f}s) alternated dynamically. Video URL: {gcs_uri}"
+            else:
+                return f"✅ Video processed: A-roll ({a_duration:.1f}s) and B-roll ({b_duration:.1f}s) alternated dynamically."
             
         except subprocess.CalledProcessError as e:
             return f"❌ FFmpeg failed:\n{e.stderr}"
