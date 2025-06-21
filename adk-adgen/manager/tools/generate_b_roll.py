@@ -111,29 +111,11 @@ async def generate_b_roll(prompt: str, tool_context: ToolContext) -> str:
         if poll_data.get("done"):
             uri_link = poll_data["response"]["videos"][0]["gcsUri"]
             if uri_link:
-                # Save to artifacts and return a publicly accessible URL
+                # Save to artifacts
                 save_result = await save_video(uri_link, tool_context)
                 
-                # Create a signed URL for public access (valid for 1 hour)
-                try:
-                    path = uri_link[5:]  # Remove 'gs://'
-                    bucket_name, object_name = path.split('/', 1)
-                    client = storage.Client()
-                    bucket = client.bucket(bucket_name)
-                    blob = bucket.blob(object_name)
-                    
-                    # Generate a signed URL valid for 1 hour
-                    from datetime import timedelta
-                    signed_url = blob.generate_signed_url(
-                        version="v4",
-                        expiration=timedelta(hours=1),
-                        method="GET"
-                    )
-                    
-                    return f"Video generated successfully. Video URL: {signed_url}"
-                except Exception as e:
-                    # Fallback to GCS URI if signing fails
-                    return f"Video generated successfully. Video URL: {uri_link}"
+                # Return GCS URI - frontend will convert to public HTTP URL
+                return f"Video generated successfully. Video URL: {uri_link}"
 
         await asyncio.sleep(10)
 
