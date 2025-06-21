@@ -1213,7 +1213,7 @@ export function VideoGenerationWizard() {
             <div className="text-center py-16">
               <Loader2 className="w-16 h-16 text-blue-400 mx-auto mb-6 animate-spin" />
               <h3 className="text-white font-semibold text-xl mb-3">Generating Raw Footage...</h3>
-              <p className="text-gray-400 text-base">Creating your A-roll and B-roll videos sequentially</p>
+              <p className="text-gray-400 text-base">Creating your A-roll and B-roll videos</p>
               <div className="mt-4 space-y-2 text-sm">
                 <p className="text-gray-500">🎭 Step 1: Generating A-roll (avatar video)</p>
                 <p className="text-gray-500">🎬 Step 2: Generating B-roll (product video)</p>
