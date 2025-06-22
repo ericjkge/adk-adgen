@@ -15,30 +15,46 @@ OUTPUT_STORAGE_URI = os.getenv("OUTPUT_STORAGE_URI")
 async def upload_to_gcs(video_path: Path, tool_context: ToolContext) -> str | None:
     """Upload processed video to GCS and return the public URI."""
     try:
+        print(f"DEBUG: upload_to_gcs called with video_path: {video_path}")
+        print(f"DEBUG: OUTPUT_STORAGE_URI: {OUTPUT_STORAGE_URI}")
+        
         if not OUTPUT_STORAGE_URI:
+            print("DEBUG: OUTPUT_STORAGE_URI is not set")
             return None
             
         # Parse bucket name from OUTPUT_STORAGE_URI (e.g., "gs://bucket-name/")
         bucket_name = OUTPUT_STORAGE_URI.replace("gs://", "").rstrip("/")
+        print(f"DEBUG: Parsed bucket name: {bucket_name}")
         
         # Generate unique filename for processed video
         unique_id = str(uuid.uuid4().int)[:15]  # Use first 15 digits of UUID
         object_name = f"{unique_id}/processed_video.mp4"
+        print(f"DEBUG: Generated object name: {object_name}")
         
+        # Check if file exists
+        if not video_path.exists():
+            print(f"DEBUG: Video file does not exist at {video_path}")
+            return None
+            
         # Initialize GCS client and upload
+        print("DEBUG: Initializing GCS client")
         client = storage.Client()
         bucket = client.bucket(bucket_name)
         blob = bucket.blob(object_name)
         
         # Upload the video file
+        print(f"DEBUG: Starting upload of {video_path} to gs://{bucket_name}/{object_name}")
         blob.upload_from_filename(str(video_path))
+        print("DEBUG: Upload completed successfully")
         
         # Return GCS URI
         gcs_uri = f"gs://{bucket_name}/{object_name}"
+        print(f"DEBUG: Returning GCS URI: {gcs_uri}")
         return gcs_uri
         
     except Exception as e:
-        print(f"Failed to upload to GCS: {str(e)}")
+        print(f"DEBUG: Exception in upload_to_gcs: {str(e)}")
+        print(f"DEBUG: Exception type: {type(e)}")
         return None
 
 # Dynamic A-roll and B-roll alternation based on A-roll duration
@@ -133,11 +149,13 @@ async def post_process(tool_context: ToolContext) -> str:
             ))
             
             # Upload to GCS for public access
+            print(f"DEBUG: Attempting to upload to GCS. OUTPUT_STORAGE_URI: {OUTPUT_STORAGE_URI}")
             gcs_uri = await upload_to_gcs(out_path, tool_context)
+            print(f"DEBUG: GCS upload result: {gcs_uri}")
             if gcs_uri:
-                return f"✅ Video processed: A-roll ({a_duration:.1f}s) and B-roll ({b_duration:.1f}s) alternated dynamically. Video URL: {gcs_uri}"
+                return f"Video processed: A-roll ({a_duration:.1f}s) and B-roll ({b_duration:.1f}s) alternated dynamically. Video URL: {gcs_uri}"
             else:
-                return f"✅ Video processed: A-roll ({a_duration:.1f}s) and B-roll ({b_duration:.1f}s) alternated dynamically."
+                return f"Video processed: A-roll ({a_duration:.1f}s) and B-roll ({b_duration:.1f}s) alternated dynamically. (GCS upload failed)"
             
         except subprocess.CalledProcessError as e:
             return f"❌ FFmpeg failed:\n{e.stderr}"

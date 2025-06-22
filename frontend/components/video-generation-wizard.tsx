@@ -1066,41 +1066,44 @@ export function VideoGenerationWizard() {
       const events = await runResponse.json()
       console.log("Processing agent response events:", events)
       
-      // Look for success message and video URL from processing agent
-      let processingSuccess = false
+      // Extract final video URL from processing agent response
       let finalVideoUrl = null
+      console.log("Processing final video events:", JSON.stringify(events, null, 2))
       
       for (const event of events) {
         if (event.content && event.content.parts) {
           for (const part of event.content.parts) {
-            if (part.text && part.text.includes("✅ Video processed")) {
-              processingSuccess = true
-              console.log("Video processing completed successfully:", part.text)
-              
-              // Extract final video URL if present
+            if (part.text) {
+              console.log(`Final video event author: ${event.author}, Text: ${part.text}`)
+              // Look for final video URL in standard format (supports both https and gs:// URLs)
               const urlMatch = part.text.match(/Video URL:\s*((?:https?|gs):\/\/[^\s]+)/);
               if (urlMatch) {
                 const rawUrl = urlMatch[1];
-                // Convert GCS URI to public HTTP URL if needed
+                console.log(`Found final video URL: ${rawUrl}`)
+                
+                // Convert GCS URI to public HTTP URL since bucket is now public
                 if (rawUrl.startsWith('gs://')) {
                   finalVideoUrl = rawUrl.replace('gs://', 'https://storage.googleapis.com/');
-                  console.log(`Found final video URL: ${finalVideoUrl}`)
+                  console.log(`Converted GCS URI to public URL: ${finalVideoUrl}`)
                 } else {
                   finalVideoUrl = rawUrl;
                 }
+                break;
               }
-              break;
             }
           }
         }
-        if (processingSuccess) break;
+        if (finalVideoUrl) break;
       }
       
-      if (processingSuccess) {
+      console.log(`Final video URL: ${finalVideoUrl}`)
+      console.log("Full final video response for debugging:", JSON.stringify(events, null, 2))
+      
+      if (finalVideoUrl) {
         console.log("Final video processed successfully")
         setSession(prev => prev ? {
           ...prev,
-          final_video_url: finalVideoUrl || prev.broll_url || prev.aroll_url || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+          final_video_url: finalVideoUrl
         } : null)
       } else {
         console.log("Processing may have failed, using fallback video")
