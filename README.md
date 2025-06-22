@@ -1,4 +1,4 @@
-# ADK AdGen - AI Video Advertisement Generator
+# Vibe - Multi-agent Ad Generation
 
 Generate video advertisements from product URLs using Google's ADK framework, HeyGen avatars, and Veo 2.
 
