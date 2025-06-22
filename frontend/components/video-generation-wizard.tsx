@@ -679,8 +679,9 @@ export function VideoGenerationWizard() {
   const renderInputStep = () => (
     <div className="max-w-3xl mx-auto">
       <div className="text-center mb-12">
-        <h1 className="text-7xl font-bold text-white mb-8 tracking-tight min-h-[120px] whitespace-nowrap flex items-center justify-center" style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}>            {displayedText}
-           <span className={`${showCursor ? "opacity-100" : "opacity-0"} transition-opacity duration-100 ml-2 text-8xl`} style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}>|</span>
+        <h1 className="text-7xl font-bold text-white mb-8 tracking-tight min-h-[120px] whitespace-nowrap flex items-center justify-center" style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}>
+          {displayedText}
+          <span className={`${showCursor ? "opacity-100" : "opacity-0"} transition-opacity duration-100 ml-2 text-8xl`} style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}>|</span>
         </h1>
         <p className="text-xl text-purple-300 font-light" style={{ fontFamily: 'IBM Plex Mono, monospace', fontWeight: 'bold' }}>ENTER YOUR PRODUCT URL TO GET STARTED</p>
       </div>
