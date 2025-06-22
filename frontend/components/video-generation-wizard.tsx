@@ -684,6 +684,8 @@ export function VideoGenerationWizard() {
         </h1>
         <p className="text-xl text-purple-300 font-light" style={{ fontFamily: 'IBM Plex Mono, monospace', fontWeight: 'bold' }}>ENTER YOUR PRODUCT URL TO GET STARTED</p>
       </div>
+
+
   
       <div className="space-y-10">
         <Input
@@ -717,6 +719,49 @@ export function VideoGenerationWizard() {
             </>
           )}
         </Button>
+        
+        {/* Supported Sites - Logo Banner */}
+        <div className="mt-8">
+          <p className="text-center text-purple-300/60 text-sm mb-4" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
+            Supported Sites:
+          </p>
+          <div className="flex justify-center items-center gap-8 opacity-70 hover:opacity-100 transition-opacity duration-300">
+            {/* eBay Logo */}
+            <div className="flex items-center gap-3 hover:scale-105 transition-transform duration-200">
+              <img 
+                src="/ebay.svg" 
+                alt="eBay" 
+                className="h-6 w-auto opacity-80 hover:opacity-100 transition-opacity duration-200"
+              />
+            </div>
+            
+            {/* Shopify Logo */}
+            <div className="flex items-center gap-3 hover:scale-105 transition-transform duration-200">
+              <img 
+                src="/shopify.png" 
+                alt="Shopify" 
+                className="h-6 w-auto opacity-80 hover:opacity-100 transition-opacity duration-200 scale-[2.5]"
+              />
+            </div>
+            
+            {/* Target Logo */}
+            <div className="flex items-center gap-3 hover:scale-105 transition-transform duration-200">
+              <img 
+                src="/target.png" 
+                alt="Target" 
+                className="h-6 w-auto opacity-80 hover:opacity-100 transition-opacity duration-200 scale-[1.5]"
+              />
+            </div>
+            
+            {/* Most Brand Sites */}
+            <div className="flex items-center gap-2 text-white/60 hover:text-white/80 transition-colors duration-200 hover:scale-105 transform duration-200">
+              <div className="w-6 h-6 bg-purple-500/60 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-xs">+</span>
+              </div>
+              <span className="text-sm font-medium">More</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

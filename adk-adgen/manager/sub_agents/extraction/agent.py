@@ -16,7 +16,8 @@ extraction_agent = Agent(
     - `description`: A concise 1-2 sentence summary of what the product is or does.
     - `key_features`: A list of up to 5 bullet-point features or differentiators.
     - `price`: The product's listed price (e.g., "$249"), if available.
-    - `image_url`: A URL to a main product image or OpenGraph thumbnail.
+    - `image_url`: A URL to the main product image.
+    NOTE: Look for image URLs from the 'extract_metadata' tool in the "images" field of the tool response. Select the most relevant product image (typically the first, largest, or most keyword relevant). Prefer actual downloadable image URLs over placeholder images.
     - `product_url`: The original product URL (input).
 
     Return the result in **strict JSON format**, using these exact keys.

@@ -20,7 +20,7 @@ def extract_metadata(url: str) -> dict:
 
     payload = {
         "urls": url,
-        "include_images": False,
+        "include_images": True,
         "extract_depth": "basic",
         "format": "markdown",
     }
