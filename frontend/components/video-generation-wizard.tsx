@@ -1402,7 +1402,23 @@ export function VideoGenerationWizard() {
   }
 
   return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-purple-900 text-white font-sans antialiased flex flex-col relative" style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}>      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-purple-900 text-white font-sans antialiased flex flex-col relative" style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}>
+        
+        {/* VIBE Logo - Upper Left */}
+        <div className="absolute top-6 left-6 z-50">
+          <h1 
+            className="text-2xl font-bold text-white tracking-wider"
+            style={{ 
+              fontFamily: 'Rubik, sans-serif', 
+              fontWeight: 'bold',
+              textShadow: '0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(168, 85, 247, 0.4), 0 0 40px rgba(168, 85, 247, 0.2)'
+            }}
+          >
+            VIBE
+          </h1>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Progress Steps */}
         <div className="mb-16">
           <div className="flex items-center justify-center space-x-12">
