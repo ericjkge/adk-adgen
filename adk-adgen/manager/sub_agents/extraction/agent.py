@@ -1,8 +1,6 @@
 from google.adk.agents import Agent
 from ...tools.extract_metadata import extract_metadata
 
-# NOTE: output schema cannot be used with tools!
-
 extraction_agent = Agent(
     name="extraction_agent",
     model="gemini-2.0-flash",

@@ -5,7 +5,6 @@ from .sub_agents.script.agent import script_agent
 from .sub_agents.aroll.agent import a_roll_agent
 from .sub_agents.broll.agent import b_roll_agent
 from .sub_agents.processing.agent import processing_agent
-# from .tools.load_media import load_gcs_files_to_artifacts
 
 root_agent = Agent(
     name="manager",
@@ -39,6 +38,5 @@ root_agent = Agent(
         a_roll_agent,
         b_roll_agent,
         processing_agent
-        ],
-    # tools=[load_gcs_files_to_artifacts]
+        ]
 )

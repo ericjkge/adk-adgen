@@ -4,7 +4,6 @@ from ...tools.search_audience import search_audience
 from ...tools.search_competitors import search_competitors
 from ...tools.extract_metadata import extract_metadata
 
-# NOTE: output schema cannot be used with tools!
 
 market_agent = Agent(
     name="market_agent",

@@ -57,11 +57,9 @@ export function VideoGenerationWizard() {
     if (!productUrl.trim()) return
     
     setIsLoading(true)
-    console.log("Starting video generation for:", productUrl)
     
     try {
       // Step 1: Create a session for the manager agent
-      console.log("Creating session...")
       const sessionResponse = await fetch("/api/adk/apps/manager/users/user_123/sessions", {
         method: "POST",
         headers: {
@@ -75,10 +73,8 @@ export function VideoGenerationWizard() {
       }
       
       const sessionData = await sessionResponse.json()
-      console.log("Session created:", sessionData.id)
       
       // Step 2: Call the manager agent to run analysis agent (extraction + save)
-      console.log("Calling manager agent to run analysis agent...")
       const runResponse = await fetch("/api/adk/run", {
         method: "POST", 
         headers: {
@@ -102,12 +98,10 @@ export function VideoGenerationWizard() {
       }
       
       const events = await runResponse.json()
-      console.log("Manager agent response events:", events)
       
       // Process the events to extract metadata from analysis agent
       let extractedMetadata = null
       for (const event of events) {
-        console.log("Processing event:", event)
         
         // Look for extraction agent output in the event content
         if (event.content && event.content.parts) {
@@ -125,7 +119,6 @@ export function VideoGenerationWizard() {
                 }
               } catch (e) {
                 // Continue if not valid JSON
-                console.log("Failed to parse JSON from extraction response:", e)
               }
             }
           }
@@ -135,7 +128,6 @@ export function VideoGenerationWizard() {
       }
       
       if (extractedMetadata) {
-        console.log("Extracted metadata:", extractedMetadata)
         setSession({
           session_id: sessionData.id,
           user_id: "user_123",
@@ -146,7 +138,6 @@ export function VideoGenerationWizard() {
         setCurrentStep(2)
       } else {
         // Fallback to mock data if extraction failed
-        console.log("Using fallback metadata - extraction may have failed")
         setSession({
           session_id: sessionData.id,
           user_id: "user_123", 
@@ -168,7 +159,6 @@ export function VideoGenerationWizard() {
       
       setIsLoading(false)
     } catch (error) {
-      console.error("Error starting generation:", error)
       setIsLoading(false)
       
       // Show error to user
@@ -180,11 +170,9 @@ export function VideoGenerationWizard() {
     if (!session?.session_id || !session?.metadata) return
     
     setIsLoading(true)
-    console.log("Loading market analysis...")
     
     try {
       // Call the manager agent to run market agent
-      console.log("Calling manager agent to run market agent...")
       const runResponse = await fetch("/api/adk/run", {
         method: "POST", 
         headers: {
@@ -208,12 +196,10 @@ export function VideoGenerationWizard() {
       }
       
       const events = await runResponse.json()
-      console.log("Manager agent response events:", events)
       
       // Process the events to extract market analysis from market agent
       let extractedMarketAnalysis = null
       for (const event of events) {
-        console.log("Processing market event:", event)
         
         // Look for market agent output in the event content
         if (event.content && event.content.parts) {
@@ -231,7 +217,6 @@ export function VideoGenerationWizard() {
                 }
               } catch (e) {
                 // Continue if not valid JSON
-                console.log("Failed to parse JSON from market response:", e)
               }
             }
           }
@@ -241,14 +226,12 @@ export function VideoGenerationWizard() {
       }
       
       if (extractedMarketAnalysis) {
-        console.log("Extracted market analysis:", extractedMarketAnalysis)
         setSession(prev => prev ? {
           ...prev,
           market_analysis: extractedMarketAnalysis
         } : null)
       } else {
         // Fallback to mock data if extraction failed
-        console.log("Using fallback market analysis data - market agent may have failed")
         setSession(prev => prev ? {
           ...prev,
           market_analysis: {
@@ -289,7 +272,6 @@ export function VideoGenerationWizard() {
       setCurrentStep(3)
       setIsLoading(false)
     } catch (error) {
-      console.error("Error loading market analysis:", error)
       setIsLoading(false)
       
       // Show error to user
@@ -301,11 +283,9 @@ export function VideoGenerationWizard() {
     if (!session?.session_id || !session?.metadata || !session?.market_analysis) return
     
     setIsLoading(true)
-    console.log("Generating script...")
     
     try {
       // Call the manager agent to run script agent
-      console.log("Calling manager agent to run script agent...")
       const runResponse = await fetch("/api/adk/run", {
         method: "POST", 
         headers: {
@@ -329,12 +309,10 @@ export function VideoGenerationWizard() {
       }
       
       const events = await runResponse.json()
-      console.log("Manager agent response events:", events)
       
       // Process the events to extract script from script agent
       let extractedScript = null
       for (const event of events) {
-        console.log("Processing script event:", event)
         
         // Look for script agent output in the event content
         if (event.content && event.content.parts) {
@@ -352,7 +330,6 @@ export function VideoGenerationWizard() {
                 }
               } catch (e) {
                 // Continue if not valid JSON
-                console.log("Failed to parse JSON from script response:", e)
               }
             }
           }
@@ -362,7 +339,6 @@ export function VideoGenerationWizard() {
       }
       
       if (extractedScript) {
-        console.log("Extracted script:", extractedScript)
         setSession(prev => prev ? {
           ...prev,
           script: extractedScript,
@@ -370,7 +346,6 @@ export function VideoGenerationWizard() {
         } : null)
       } else {
         // Fallback to mock data if extraction failed
-        console.log("Using fallback script data - script agent may have failed")
         setSession(prev => prev ? {
           ...prev,
           script: {
@@ -384,7 +359,6 @@ export function VideoGenerationWizard() {
       setCurrentStep(4)
       setIsLoading(false)
     } catch (error) {
-      console.error("Error generating script:", error)
       setIsLoading(false)
       
       // Show error to user
@@ -396,11 +370,9 @@ export function VideoGenerationWizard() {
     if (!session?.session_id || !feedback.trim()) return
     
     setIsLoading(true)
-    console.log("Submitting feedback:", feedback)
     
     try {
       // Call the manager agent to run script agent with feedback
-      console.log("Calling manager agent to refine script with feedback...")
       const runResponse = await fetch("/api/adk/run", {
         method: "POST", 
         headers: {
@@ -424,12 +396,10 @@ export function VideoGenerationWizard() {
       }
       
       const events = await runResponse.json()
-      console.log("Manager agent response events:", events)
       
       // Process the events to extract refined script
       let refinedScript = null
       for (const event of events) {
-        console.log("Processing refined script event:", event)
         
         if (event.content && event.content.parts) {
           for (const part of event.content.parts) {
@@ -444,7 +414,7 @@ export function VideoGenerationWizard() {
                   }
                 }
               } catch (e) {
-                console.log("Failed to parse JSON from refined script response:", e)
+                // Continue if not valid JSON
               }
             }
           }
@@ -454,7 +424,6 @@ export function VideoGenerationWizard() {
       }
       
       if (refinedScript) {
-        console.log("Script refined successfully:", refinedScript)
         setSession(prev => prev ? {
           ...prev,
           script: refinedScript,
@@ -468,7 +437,6 @@ export function VideoGenerationWizard() {
       
       setIsLoading(false)
     } catch (error) {
-      console.error("Error submitting feedback:", error)
       setIsLoading(false)
       
       alert(`Error refining script: ${error instanceof Error ? error.message : 'Unknown error'}. Please check the console for details.`)
@@ -482,7 +450,6 @@ export function VideoGenerationWizard() {
     
     // Move to Step 5 (Raw Footage) immediately with loading state
     setCurrentStep(5)
-    console.log("Script approved, generating A-roll and B-roll footage...")
     
     try {
       // TEST MODE: Set to true to use hardcoded A-roll URL, false to generate new A-roll
@@ -492,11 +459,9 @@ export function VideoGenerationWizard() {
       let arollUrl = null
       
       if (TEST_MODE && HARDCODED_AROLL_URL) {
-        console.log("Using hardcoded A-roll URL for testing:", HARDCODED_AROLL_URL)
         arollUrl = HARDCODED_AROLL_URL
       } else {
         // Generate new A-roll video
-        console.log("Calling manager agent to run A-roll agent...")
         const arollResponse = await fetch("/api/adk/run", {
           method: "POST", 
           headers: {
@@ -520,7 +485,6 @@ export function VideoGenerationWizard() {
         }
         
         const arollEvents = await arollResponse.json()
-        console.log("A-roll agent response events:", arollEvents)
         
         // Extract A-roll URL from A-roll agent response
         for (const event of arollEvents) {
@@ -531,8 +495,6 @@ export function VideoGenerationWizard() {
                 const urlMatch = part.text.match(/Video URL:\s*(https?:\/\/[^\s]+)/);
                 if (urlMatch) {
                   arollUrl = urlMatch[1];
-                  console.log(`🎭 FOUND A-ROLL URL: ${arollUrl}`)
-                  console.log(`🎭 COPY THIS URL FOR FUTURE TESTING: ${arollUrl}`)
                   break;
                 }
               }
@@ -543,7 +505,6 @@ export function VideoGenerationWizard() {
       }
       
       // Call B-roll agent
-      console.log("Calling manager agent to run B-roll agent...")
       const brollResponse = await fetch("/api/adk/run", {
         method: "POST", 
         headers: {
@@ -567,27 +528,22 @@ export function VideoGenerationWizard() {
       }
       
       const brollEvents = await brollResponse.json()
-      console.log("B-roll agent response events:", brollEvents)
       
       // Extract B-roll URL from B-roll agent response
       let brollUrl = null
-      console.log("Processing B-roll events:", JSON.stringify(brollEvents, null, 2))
       
       for (const event of brollEvents) {
         if (event.content && event.content.parts) {
           for (const part of event.content.parts) {
             if (part.text) {
-              console.log(`B-roll event author: ${event.author}, Text: ${part.text}`)
               // Look for B-roll URL in standard format (supports both https and gs:// URLs)
               const urlMatch = part.text.match(/Video URL:\s*((?:https?|gs):\/\/[^\s]+)/);
                 if (urlMatch) {
                   const rawUrl = urlMatch[1];
-                  console.log(`Found B-roll URL: ${rawUrl}`)
                   
                   // Convert GCS URI to public HTTP URL since bucket is now public
                   if (rawUrl.startsWith('gs://')) {
                     brollUrl = rawUrl.replace('gs://', 'https://storage.googleapis.com/');
-                    console.log(`Converted GCS URI to public URL: ${brollUrl}`)
                   } else {
                     brollUrl = rawUrl;
                   }
@@ -599,13 +555,7 @@ export function VideoGenerationWizard() {
         if (brollUrl) break;
       }
       
-      console.log(`B-roll URL: ${brollUrl}`)
-      console.log("Full B-roll response for debugging:", JSON.stringify(brollEvents, null, 2))
-      
-      console.log("Final URLs:", { arollUrl, brollUrl })
-      
       if (arollUrl && brollUrl) {
-        console.log("Both A-roll and B-roll footage generated successfully")
         setSession(prev => prev ? {
           ...prev,
           aroll_url: arollUrl,
@@ -614,7 +564,6 @@ export function VideoGenerationWizard() {
         } : null)
       } else {
         // Use fallbacks for any missing videos
-        console.log("Using fallback URLs for missing videos")
         setSession(prev => prev ? {
           ...prev,
           aroll_url: arollUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -626,7 +575,6 @@ export function VideoGenerationWizard() {
       setCurrentStep(5)
       setIsLoading(false)
     } catch (error) {
-      console.error("Error generating B-roll footage:", error)
       setIsLoading(false)
       
       alert(`Error generating B-roll footage: ${error instanceof Error ? error.message : 'Unknown error'}. Please check the console for details.`)
@@ -1036,11 +984,9 @@ export function VideoGenerationWizard() {
     if (!session?.session_id || !session?.aroll_url || !session?.broll_url) return
     
     setIsLoading(true)
-    console.log("Processing raw footage into final video...")
     
     try {
       // Call the manager agent to run processing agent
-      console.log("Calling manager agent to run processing agent...")
       const runResponse = await fetch("/api/adk/run", {
         method: "POST", 
         headers: {
@@ -1064,27 +1010,22 @@ export function VideoGenerationWizard() {
       }
       
       const events = await runResponse.json()
-      console.log("Processing agent response events:", events)
       
       // Extract final video URL from processing agent response
       let finalVideoUrl = null
-      console.log("Processing final video events:", JSON.stringify(events, null, 2))
       
       for (const event of events) {
         if (event.content && event.content.parts) {
           for (const part of event.content.parts) {
             if (part.text) {
-              console.log(`Final video event author: ${event.author}, Text: ${part.text}`)
               // Look for final video URL in standard format (supports both https and gs:// URLs)
               const urlMatch = part.text.match(/Video URL:\s*((?:https?|gs):\/\/[^\s]+)/);
               if (urlMatch) {
                 const rawUrl = urlMatch[1];
-                console.log(`Found final video URL: ${rawUrl}`)
                 
                 // Convert GCS URI to public HTTP URL since bucket is now public
                 if (rawUrl.startsWith('gs://')) {
                   finalVideoUrl = rawUrl.replace('gs://', 'https://storage.googleapis.com/');
-                  console.log(`Converted GCS URI to public URL: ${finalVideoUrl}`)
                 } else {
                   finalVideoUrl = rawUrl;
                 }
@@ -1096,17 +1037,12 @@ export function VideoGenerationWizard() {
         if (finalVideoUrl) break;
       }
       
-      console.log(`Final video URL: ${finalVideoUrl}`)
-      console.log("Full final video response for debugging:", JSON.stringify(events, null, 2))
-      
       if (finalVideoUrl) {
-        console.log("Final video processed successfully")
         setSession(prev => prev ? {
           ...prev,
           final_video_url: finalVideoUrl
         } : null)
       } else {
-        console.log("Processing may have failed, using fallback video")
         setSession(prev => prev ? {
           ...prev,
           final_video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
@@ -1116,7 +1052,6 @@ export function VideoGenerationWizard() {
       setCurrentStep(6)
       setIsLoading(false)
     } catch (error) {
-      console.error("Error processing raw footage:", error)
       setIsLoading(false)
       
       alert(`Error processing raw footage: ${error instanceof Error ? error.message : 'Unknown error'}. Please check the console for details.`)
@@ -1247,7 +1182,7 @@ export function VideoGenerationWizard() {
   const renderFinalVideoStep = () => {
     const shareToSocial = (platform: string) => {
       const videoUrl = session?.final_video_url
-      const text = `Check out this AI-generated video ad I just created! 🚀`
+      const text = `Check out this AI-generated video ad I just created!`
       
       const shareUrls = {
         instagram: `https://www.instagram.com/`, // Instagram doesn't support direct URL sharing
@@ -1270,7 +1205,7 @@ export function VideoGenerationWizard() {
     return (
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-white mb-3">🎉 Your Video is Ready!</h2>
+          <h2 className="text-3xl font-bold text-white mb-3">Your Video is Ready!</h2>
           <p className="text-gray-400">Your AI-generated video ad is complete and ready to share</p>
         </div>
         
@@ -1322,28 +1257,28 @@ export function VideoGenerationWizard() {
                         className="border-pink-500 text-pink-400 hover:bg-pink-500/10 hover:border-pink-400 px-4 py-3 font-medium transition-all duration-200"
                         onClick={() => shareToSocial('instagram')}
                       >
-                        📷 Instagram
+                        Instagram
                       </Button>
                       <Button
                         variant="outline"
                         className="border-black text-gray-300 hover:bg-gray-800 hover:border-gray-500 px-4 py-3 font-medium transition-all duration-200"
                         onClick={() => shareToSocial('tiktok')}
                       >
-                        🎵 TikTok
+                        TikTok
                       </Button>
                       <Button
                         variant="outline"
                         className="border-orange-500 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-4 py-3 font-medium transition-all duration-200"
                         onClick={() => shareToSocial('reddit')}
                       >
-                        🔴 Reddit
+                        Reddit
                       </Button>
                       <Button
                         variant="outline"
                         className="border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-4 py-3 font-medium transition-all duration-200"
                         onClick={() => shareToSocial('twitter')}
                       >
-                        🐦 Twitter
+                        Twitter
                       </Button>
                     </div>
                     <Button
@@ -1351,7 +1286,7 @@ export function VideoGenerationWizard() {
                       className="w-full border-blue-600 text-blue-400 hover:bg-blue-600/10 hover:border-blue-500 px-4 py-3 font-medium transition-all duration-200"
                       onClick={() => shareToSocial('linkedin')}
                     >
-                      💼 LinkedIn
+                      LinkedIn
                     </Button>
                   </div>
                 </div>
@@ -1389,10 +1324,10 @@ export function VideoGenerationWizard() {
                 <h3 className="text-white font-semibold text-xl mb-3">Processing Your Final Video...</h3>
                 <p className="text-gray-400 text-base">Combining A-roll and B-roll footage with smart transitions</p>
                 <div className="mt-4 space-y-2 text-sm">
-                  <p className="text-gray-500">🎬 Merging video tracks</p>
-                  <p className="text-gray-500">🎵 Syncing audio</p>
-                  <p className="text-gray-500">✨ Adding transitions</p>
-                  <p className="text-gray-500 mt-3">⏱️ Estimated time: ~2-3 minutes</p>
+                  <p className="text-gray-500">Merging video tracks</p>
+                  <p className="text-gray-500">Syncing audio</p>
+                  <p className="text-gray-500">Adding transitions</p>
+                  <p className="text-gray-500 mt-3">Estimated time: ~2-3 minutes</p>
                 </div>
               </div>
             )}

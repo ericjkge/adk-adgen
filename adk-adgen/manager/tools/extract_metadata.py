@@ -29,17 +29,4 @@ def extract_metadata(url: str) -> dict:
     }
 
     response = requests.request("POST", endpoint, json=payload, headers=headers)
-    return response.json() 
-
-    # load_dotenv()
-    # FIRECRAWL_API_KEY = os.getenv("FIRECRAWL_API_KEY")
-    # 
-    # endpoint = "https://api.firecrawl.dev/v1/scrape"
-    #
-    # response = requests.post(  
-    #     endpoint,  
-    #     json={"url": url},  
-    #     headers={"Authorization": f"Bearer {FIRECRAWL_API_KEY}"}  
-    # )  
-    # response.raise_for_status()  
-    # return response.json()
+    return response.json()

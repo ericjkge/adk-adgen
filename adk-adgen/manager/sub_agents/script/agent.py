@@ -60,12 +60,3 @@ script_agent = Agent(
     output_schema=AVScript,
     output_key="av_script",
 )
-
-# NOTE: root agent will probabilistically call script agent for generation and refinement from frontend APIs that say smth like:
-# "call script agent: script generation"
-
-#that follows this structure:
-    # - Hook (0-3s): Grab attention
-    # - Problem (3-7s): Highlight user pain point
-    # - Solution + Features (7-20s): Show how the product helps, highlight key features
-    # - Call to Action (20-30s): Tell the viewer what to do next
