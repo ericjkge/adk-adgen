@@ -1,9 +1,11 @@
-import requests
 import os
+
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+
 
 def search_audience(query: str) -> dict:
     """
@@ -13,7 +15,7 @@ def search_audience(query: str) -> dict:
         query: The search query to find target demographics.
 
     Returns:
-        dict: A dictionary containing the search results.    
+        dict: A dictionary containing the search results.
     """
 
     url = "https://api.tavily.com/search"
@@ -32,14 +34,13 @@ def search_audience(query: str) -> dict:
         "include_image_descriptions": False,
         "include_domains": [],
         "exclude_domains": [],
-        "country": None
+        "country": None,
     }
     headers = {
         "Authorization": f"Bearer {TAVILY_API_KEY}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
     response = requests.request("POST", url, json=payload, headers=headers)
 
     return response.json()
-

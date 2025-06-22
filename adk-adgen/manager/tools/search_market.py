@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
+
 def search_market(queries: List[str]) -> Dict[str, dict]:
     """
     Searches for market size and trends using Tavily's search API.
@@ -14,14 +15,14 @@ def search_market(queries: List[str]) -> Dict[str, dict]:
         queries (List[str]): A list of 2 queries (market size and trends).
 
     Returns:
-        Dict[str, dict]: A mapping from each query to its search result.    
+        Dict[str, dict]: A mapping from each query to its search result.
     """
 
     url = "https://api.tavily.com/search"
 
     headers = {
         "Authorization": f"Bearer {TAVILY_API_KEY}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
     results = {}
@@ -41,7 +42,7 @@ def search_market(queries: List[str]) -> Dict[str, dict]:
             "include_image_descriptions": False,
             "include_domains": [],
             "exclude_domains": [],
-            "country": None
+            "country": None,
         }
 
         response = requests.request("POST", url, json=payload, headers=headers)

@@ -83,10 +83,11 @@ market_agent = Agent(
     }
     </OUTPUT_FORMAT>
     """,
-    tools=[search_market, 
-           search_audience,
-           search_competitors, 
-           extract_metadata,
-        ],
+    tools=[
+        search_market,
+        search_audience,
+        search_competitors,
+        extract_metadata,
+    ],
     output_key="market_analysis",
 )

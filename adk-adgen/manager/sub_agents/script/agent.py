@@ -1,13 +1,15 @@
 from google.adk.agents import Agent
-from pydantic import BaseModel, Field 
+from pydantic import BaseModel, Field
+
 
 class AVScript(BaseModel):
     audio_script: str = Field(
         description="The narration script intended for HeyGen avatar generation. This should be natural, concise, and free of visual or formatting instructions."
     )
     video_script: str = Field(
-        description="A scene-by-scene visual description suitable for Veo 2 video generation. Use cinematic language to describe each scene clearly."
+        description="A scene-by-scene visual description suitable for Veo 2 video generation. Use simple language to describe each scene clearly."
     )
+
 
 script_agent = Agent(
     name="script_agent",
@@ -30,11 +32,11 @@ script_agent = Agent(
     1. Use {metadata} and {market_analysis} to generate an initial ad script with two parts:
 
         - **audio_script (A-roll):**
-            A 10-second voiceover/narration in the tone of a relatable influencer. Use full sentences, but keep them conversational. Prioritize clarity, energy, and authenticity. 
+            A 10-second voiceover/narration in the tone of a polished brand ad. Use full sentences, but keep them conversational. Prioritize clarity, energy, and authenticity. 
             You can:
-            - Start with a hook or personal reaction (“I've been using this…” / “This changed how I…”)
-            - Mention product benefits naturally
-            - End with a casual CTA or closing punchline
+            - Start with a clear statement or product insight
+            - Highlight key product benefits
+            - End with a signature line or soft CTA
 
         - **video_script (B-roll):**
             A short visual description (2 scenes max) that complements the voiceover. Focus on product-centric visuals.
@@ -44,9 +46,9 @@ script_agent = Agent(
     </WORKFLOW>
 
     <STYLE_GUIDANCE>
-    - Make the A-roll feel like something a TikTok or Instagram creator might say — unscripted but still structured.
-    - Use contractions, filler words, or phrases if they add realism.
-    - Avoid jargon or sounding like a corporate ad.
+    - Make the A-roll sound like a voiceover from a professional commercial — polished, intentional, and brand-aligned.
+    - Avoid slang, filler words, or casual phrasing.
+    - Keep it minimal and product-driven.
     </STYLE_GUIDANCE>
 
     <WARNINGS>

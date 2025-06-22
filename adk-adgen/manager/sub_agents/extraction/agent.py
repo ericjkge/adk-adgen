@@ -46,5 +46,5 @@ extraction_agent = Agent(
     </EXAMPLE>
     """,
     tools=[extract_metadata],
-    output_key="metadata"
+    output_key="metadata",
 )

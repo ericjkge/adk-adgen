@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,9 +22,6 @@ import {
   TrendingUp,
   Users
 } from "lucide-react"
-import { FaReddit, FaTwitter, FaLinkedin, FaYoutube } from "react-icons/fa"
-
-import { fallbackMetadata, fallbackMarketAnalysis, fallbackScript } from "@/lib/fallback-data"
 
 interface VideoSession {
   session_id: string
@@ -42,50 +39,12 @@ interface VideoSession {
 
 export function VideoGenerationWizard() {
   const USER_ID = "user_123" // Static user ID for demo purposes
-  
   const [currentStep, setCurrentStep] = useState(1)
   const [productUrl, setProductUrl] = useState("")
   const [session, setSession] = useState<VideoSession | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [feedback, setFeedback] = useState("")
 
-  const [displayedText, setDisplayedText] = useState("")
-  const [showCursor, setShowCursor] = useState(true)
-  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
-  const phrases = ["Create Video Ads", "Gain Market Insights", "Launch Successful Campaigns"]
-
-  useEffect(() => {
-    if (currentStep === 1) {
-      let currentIndex = 0
-      const currentPhrase = phrases[currentPhraseIndex]
-
-      const typingInterval = setInterval(() => {
-        if (currentIndex <= currentPhrase.length) {
-          setDisplayedText(currentPhrase.slice(0, currentIndex))
-          currentIndex++
-        } else {
-          clearInterval(typingInterval)
-          // Pause before starting next phrase
-          setTimeout(() => {
-            setDisplayedText("")
-            setCurrentPhraseIndex((prev) => (prev + 1) % phrases.length)
-          }, 2000) // 2 second pause between phrases
-        }
-      }, 100) // Slightly faster typing speed
-
-      return () => clearInterval(typingInterval)
-    }
-  }, [currentStep, currentPhraseIndex])
-
-  // Cursor blinking effect
-  useEffect(() => {
-    const cursorInterval = setInterval(() => {
-      setShowCursor((prev) => !prev)
-    }, 500) // Cursor blink speed
-
-    return () => clearInterval(cursorInterval)
-  }, [])
-  
   const steps = [
     { id: 1, name: "Input", icon: Play },
     { id: 2, name: "Product Info", icon: CheckCircle },
@@ -187,7 +146,13 @@ export function VideoGenerationWizard() {
           status: "processing",
           step: "extraction",
           metadata: {
-            ...fallbackMetadata,
+            brand: "Optimum Nutrition",
+            product_name: "Gold Standard 100% Whey Protein",
+            product_category: "protein powder",
+            description: "The world's best-selling whey protein powder with 24g of protein per serving to help build and maintain muscle.",
+            key_features: ["24g protein per serving", "5.5g BCAAs", "4g glutamine", "instantized for easy mixing", "banned substance tested"],
+            price: "$59.99",
+            image_url: "/placeholder.jpg",
             product_url: productUrl
           }
         })
@@ -272,14 +237,44 @@ export function VideoGenerationWizard() {
         // Fallback to mock data if extraction failed
         setSession(prev => prev ? {
           ...prev,
-          market_analysis: fallbackMarketAnalysis
+          market_analysis: {
+            market_size: "The global protein powder market is valued at $7.5 billion and growing at 8.1% annually",
+            market_trends: [
+              "Increasing demand for plant-based and clean label protein supplements",
+              "Growth in fitness and bodybuilding culture driving protein consumption",
+              "Rising popularity of convenient ready-to-drink protein products"
+            ],
+            audience_insights: {
+              demographics: {
+                age: "22-50 years",
+                income: "$35,000-$100,000",
+                gender: "65% male, 35% female"
+              },
+              psychographics: "Health-conscious fitness enthusiasts who prioritize muscle building, weight management, and active lifestyles."
+            },
+            competitors: [
+              {
+                name: "Dymatize ISO100",
+                brand: "Dymatize",
+                price: "$64.99",
+                features: "Hydrolyzed whey isolate, fast absorption, lactose-free",
+                description: "Premium whey protein isolate for serious athletes"
+              },
+              {
+                name: "Muscle Milk Pro Series",
+                brand: "Muscle Milk", 
+                price: "$49.99",
+                features: "50g protein, slow and fast proteins, added creatine",
+                description: "High-protein formula designed for muscle building and recovery"
+              }
+            ]
+          }
         } : null)
       }
       
       setCurrentStep(3)
       setIsLoading(false)
     } catch (error) {
-      console.error("Error loading market analysis:", error)
       setIsLoading(false)
       
       // Show error to user
@@ -357,7 +352,10 @@ export function VideoGenerationWizard() {
         // Fallback to mock data if extraction failed
         setSession(prev => prev ? {
           ...prev,
-          script: fallbackScript,
+          script: {
+            audio_script: "Just got my hands on this Optimum Nutrition Gold Standard Whey, and honestly? Game changer. 24 grams of protein per serving, mixes perfectly every time, and it actually tastes good. If you're serious about your gains, this is it.",
+            video_script: "Close-up of protein powder container rotating slowly. Zoom in on '24g protein' label. Cut to powder being scooped and mixed in shaker bottle. Final shot: smooth, creamy protein shake being poured."
+          },
           awaiting_feedback: true
         } : null)
       }
@@ -365,7 +363,6 @@ export function VideoGenerationWizard() {
       setCurrentStep(4)
       setIsLoading(false)
     } catch (error) {
-      console.error("Error generating script:", error)
       setIsLoading(false)
       
       // Show error to user
@@ -667,52 +664,38 @@ export function VideoGenerationWizard() {
     setSession(null)
     setIsLoading(false)
     setFeedback("")
-    setDisplayedText("")
-    setCurrentPhraseIndex(0)
   }
 
-
-
-
-
-  // Step 1 UI: URL Input
+  // STEP 1 UI: URL Input
   const renderInputStep = () => (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-xl mx-auto">
       <div className="text-center mb-12">
-        <h1 className="text-7xl font-bold text-white mb-8 tracking-tight min-h-[120px] whitespace-nowrap flex items-center justify-center" style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}>            {displayedText}
-           <span className={`${showCursor ? "opacity-100" : "opacity-0"} transition-opacity duration-100 ml-2 text-8xl`} style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}>|</span>
-        </h1>
-        <p className="text-xl text-purple-300 font-light" style={{ fontFamily: 'IBM Plex Mono, monospace', fontWeight: 'bold' }}>ENTER YOUR PRODUCT URL TO GET STARTED</p>
+        <h1 className="text-4xl font-bold text-white mb-4">Create Video Ad</h1>
+        <p className="text-gray-400">Enter your product URL to get started</p>
       </div>
-  
-      <div className="space-y-10">
+
+      <div className="space-y-6">
         <Input
           placeholder="Paste your product URL here..."
           value={productUrl}
           onChange={(e) => setProductUrl(e.target.value)}
-          className="bg-white/10 backdrop-blur-xl border-purple-400/30 text-white h-20 text-xl px-10 rounded-3xl focus:border-purple-400/60 focus:ring-2 focus:ring-purple-400/30 transition-all duration-300 shadow-2xl purple-placeholder"
-          style={{ 
-            fontFamily: 'Rubik, sans-serif', 
-            fontWeight: 'bold',
-            '--tw-placeholder-opacity': '1'
-          } as React.CSSProperties}
+          className="bg-gray-900/50 backdrop-blur-sm border-gray-600/30 text-white placeholder-gray-500 h-16 text-lg px-6 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all"
           disabled={isLoading}
         />
-  
+
         <Button
           onClick={startGeneration}
           disabled={isLoading || !productUrl.trim()}
-          className="w-full bg-purple-600/90 hover:bg-purple-500 text-white h-16 text-lg font-medium rounded-3xl transition-all duration-300 disabled:opacity-50 shadow-2xl shadow-purple-600/25 hover:shadow-purple-500/40 hover:scale-[1.02]"
-          style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white h-14 text-base font-medium transition-all duration-200 disabled:opacity-50"
         >
           {isLoading ? (
             <>
-              <Loader2 className="w-6 h-6 mr-4 animate-spin" />
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
               Analyzing...
             </>
           ) : (
             <>
-              <Play className="w-6 h-6 mr-4" />
+              <Play className="w-5 h-5 mr-2" />
               Generate Video
             </>
           )}
@@ -721,112 +704,107 @@ export function VideoGenerationWizard() {
     </div>
   )
 
-  // Step 2 UI: Product Information
+  // STEP 2 UI: Product Information Display
   const renderProductInfoStep = () => (
-    <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-8">
-        <h2 className="text-7xl font-bold text-white mb-4 tracking-tight" style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}>Product Information</h2>
-        <p className="text-lg text-purple-300 font-light" style={{ fontFamily: 'IBM Plex Mono, monospace', fontWeight: 'bold' }}>EXTRACTED DETAILS ABOUT YOUR PRODUCT</p>
+    <div className="max-w-4xl mx-auto">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-bold text-white mb-3">Product Information</h2>
+        <p className="text-gray-400">Extracted details about your product</p>
       </div>
 
-      <Card className="bg-white/10 backdrop-blur-xl border-white/20 rounded-3xl shadow-2xl">
-        <CardContent className="p-12">
+      <Card className="bg-gray-900/50 backdrop-blur-xl border-gray-600/30">
+        <CardContent className="p-8">
           {session?.metadata ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Product Image */}
-              <div className="space-y-6">
-                <img
+              <div className="space-y-4">
+                <img 
                   src={session.metadata.image_url || "/placeholder.jpg"}
                   alt={session.metadata.product_name}
-                  className="w-full h-80 object-cover rounded-2xl border border-white/20 shadow-xl"
+                  className="w-full h-64 object-cover rounded-lg border border-gray-600/30"
                 />
               </div>
 
               {/* Product Details */}
-              <div className="space-y-8">
+              <div className="space-y-6">
                 <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <Package className="h-6 w-6 text-purple-400" />
-                    <span className="text-sm font-medium text-gray-300" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>PRODUCT NAME</span>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Package className="h-5 w-5 text-blue-400" />
+                    <span className="text-sm font-medium text-gray-300">Product Name</span>
                   </div>
-                  <p className="text-xl text-white font-inter">{session.metadata.product_name}</p>
+                  <p className="text-xl font-bold text-white">{session.metadata.product_name}</p>
                 </div>
 
                 <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <Tag className="h-6 w-6 text-purple-400" />
-                    <span className="text-sm font-medium text-gray-300" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>BRAND</span>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Tag className="h-5 w-5 text-blue-400" />
+                    <span className="text-sm font-medium text-gray-300">Brand</span>
                   </div>
-                  <p className="text-xl text-white font-inter">{session.metadata.brand}</p>
+                  <p className="text-lg text-white">{session.metadata.brand}</p>
                 </div>
 
                 <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <DollarSign className="h-6 w-6 text-purple-400" />
-                    <span className="text-sm font-medium text-gray-300" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>PRICE</span>
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="h-5 w-5 text-blue-400" />
+                    <span className="text-sm font-medium text-gray-300">Price</span>
                   </div>
-                  <p className="text-xl font-medium text-green-400 font-inter">{session.metadata.price}</p>
+                  <p className="text-lg font-semibold text-green-400">{session.metadata.price}</p>
                 </div>
 
                 <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <BarChart3 className="h-6 w-6 text-purple-400" />
-                    <span className="text-sm font-medium text-gray-300 transition-colors duration-200 hover:text-purple-300 cursor-pointer" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>CATEGORY</span>
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className="bg-purple-600/30 text-purple-300 border-purple-600/40 px-4 py-2 text-sm rounded-xl transition-all duration-200 hover:bg-purple-500/40 hover:border-purple-400/60 hover:scale-105"
-                    style={{ fontFamily: 'IBM Plex Mono, monospace' }}
-                  >
+                  <span className="text-sm font-medium text-gray-300 mb-2 block">Category</span>
+                  <Badge variant="secondary" className="bg-blue-600/20 text-blue-300 border-blue-600/30">
                     {session.metadata.product_category}
                   </Badge>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="text-center py-24">
-              <Loader2 className="w-20 h-20 text-purple-400 mx-auto mb-8 animate-spin" />
-              <h3 className="text-white font-medium text-xl mb-4 font-inter">Extracting Product Information...</h3>
-              <p className="text-gray-400 text-base font-inter">Analyzing your product details</p>
+            <div className="text-center py-16">
+              <Loader2 className="w-16 h-16 text-blue-400 mx-auto mb-6 animate-spin" />
+              <h3 className="text-white font-semibold text-xl mb-3">Extracting Product Information...</h3>
+              <p className="text-gray-400 text-base">Analyzing your product details</p>
             </div>
           )}
 
           {session?.metadata && (
             <>
-              <div className="mt-12 pt-8 border-t border-purple-300/30">
-                <span className="text-sm font-medium text-gray-300 mb-4 block" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>DESCRIPTION</span>
-                <p className="text-gray-100 leading-relaxed text-base font-inter">{session.metadata.description}</p>
+              <div className="mt-8 pt-6 border-t border-gray-600/30">
+                <span className="text-sm font-medium text-gray-300 mb-3 block">Description</span>
+                <p className="text-gray-100 leading-relaxed">
+                  {session.metadata.description}
+                </p>
               </div>
 
               {session.metadata.key_features && session.metadata.key_features.length > 0 && (
-                <div className="mt-8">
-                  <span className="text-sm font-medium text-gray-300 mb-4 block" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>KEY FEATURES</span>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="mt-6">
+                  <span className="text-sm font-medium text-gray-300 mb-3 block">Key Features</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {session.metadata.key_features.map((feature: string, index: number) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0" />
-                        <span className="text-gray-100 text-sm font-inter">{feature}</span>
+                      <div key={index} className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
+                        <span className="text-gray-100">{feature}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              <div className="mt-12 flex justify-end">
-                <Button
+              <div className="mt-8 flex justify-end">
+                <Button 
                   onClick={continueToMarketAnalysis}
                   disabled={isLoading}
-                  className="bg-purple-600/90 hover:bg-purple-500 text-white px-8 py-3 text-base font-medium rounded-2xl transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-[1.02] font-inter"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                       Loading...
                     </>
                   ) : (
                     <>
                       Continue to Market Analysis
-                      <ArrowRight className="ml-3 h-5 w-5" />
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </>
                   )}
                 </Button>
@@ -838,218 +816,204 @@ export function VideoGenerationWizard() {
     </div>
   )
 
- // Step 3 UI: Market Analysis
- const renderMarketAnalysisStep = () => (
-  <div className="max-w-6xl mx-auto">
-    <div className="text-center mb-8">
-      <h2 className="text-7xl font-bold text-white mb-4 tracking-tight" style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}>Market Analysis</h2>
-      <p className="text-lg text-purple-300 font-light" style={{ fontFamily: 'IBM Plex Mono, monospace', fontWeight: 'bold' }}>UNDERSTANDING YOUR PRODUCT'S MARKET LANDSCAPE</p>
-    </div>
+  // STEP 3 UI: Market Analysis Display
+  const renderMarketAnalysisStep = () => (
+    <div className="max-w-6xl mx-auto">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-bold text-white mb-3">Market Analysis</h2>
+        <p className="text-gray-400">Understanding your product's market landscape</p>
+      </div>
+      
+      <Card className="bg-gray-900/50 backdrop-blur-xl border-gray-600/30">
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-16">
+              <Loader2 className="w-16 h-16 text-blue-400 mx-auto mb-6 animate-spin" />
+              <h3 className="text-white font-semibold text-xl mb-3">Analyzing Market Data...</h3>
+              <p className="text-gray-400 text-base">This may take a few moments</p>
+            </div>
+          ) : session?.market_analysis ? (
+            <Tabs defaultValue="trends" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 bg-gray-800 p-1 rounded-lg">
+                <TabsTrigger value="trends" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white font-semibold">
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  Market Trends
+                </TabsTrigger>
+                <TabsTrigger value="audience" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white font-semibold">
+                  <Users className="w-4 h-4 mr-2" />
+                  Audience Insights
+                </TabsTrigger>
+                <TabsTrigger value="competitors" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white font-semibold">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Competitor Analysis
+                </TabsTrigger>
+              </TabsList>
 
-    <Card className="bg-white/10 backdrop-blur-xl border-white/20 rounded-3xl shadow-2xl">
-      <CardContent className="p-12">
-        {isLoading ? (
-          <div className="text-center py-16">
-            <Loader2 className="w-16 h-16 text-purple-400 mx-auto mb-6 animate-spin" />
-            <h3 className="text-white font-semibold text-xl mb-3">Analyzing Market Data...</h3>
-            <p className="text-gray-400 text-base">This may take a few moments</p>
-          </div>
-        ) : session?.market_analysis ? (
-          <Tabs defaultValue="trends" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-800/80 p-1 rounded-lg">
-              <TabsTrigger
-                value="trends"
-                className="data-[state=active]:bg-purple-600/90 data-[state=active]:text-white font-semibold hover:bg-purple-500/50"
-                style={{ fontFamily: 'IBM Plex Mono, monospace' }}
-              >
-                <TrendingUp className="w-4 h-4 mr-2" />
-                MARKET TRENDS
-              </TabsTrigger>
-              <TabsTrigger
-                value="audience"
-                className="data-[state=active]:bg-purple-600/90 data-[state=active]:text-white font-semibold hover:bg-purple-500/50"
-                style={{ fontFamily: 'IBM Plex Mono, monospace' }}
-              >
-                <Users className="w-4 h-4 mr-2" />
-                AUDIENCE INSIGHTS
-              </TabsTrigger>
-              <TabsTrigger
-                value="competitors"
-                className="data-[state=active]:bg-purple-600/90 data-[state=active]:text-white font-semibold hover:bg-purple-500/50"
-                style={{ fontFamily: 'IBM Plex Mono, monospace' }}
-              >
-                <BarChart3 className="w-4 h-4 mr-2" />
-                COMPETITOR ANALYSIS
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="trends" className="mt-8">
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-10 border border-white/20 shadow-xl">
-                <h4 className="text-white font-bold text-xl mb-6" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>MARKET TRENDS</h4>
-                <div className="space-y-6 text-white">
-                  {session.market_analysis.market_size && (
+              <TabsContent value="trends" className="mt-8">
+                <div className="bg-gray-800/60 backdrop-blur-lg rounded-lg p-8 border border-gray-600/30 shadow-lg">
+                  <h4 className="text-white font-bold text-xl mb-6">Market Trends</h4>
+                  <div className="space-y-6 text-gray-300">
+                    {session.market_analysis.market_size && (
+                      <div className="bg-blue-600/10 border border-blue-600/20 rounded-lg p-4">
+                        <h5 className="text-blue-300 font-semibold mb-2">Market Size</h5>
+                        <p className="text-gray-300">{session.market_analysis.market_size}</p>
+                      </div>
+                    )}
                     <div>
-                      <h5 className="text-purple-300 font-semibold mb-2" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>MARKET SIZE</h5>
-                      <p className="text-white">{session.market_analysis.market_size}</p>
+                      <h5 className="text-white font-semibold mb-4">Key Trends</h5>
+                      {session.market_analysis.market_trends.map((trend: string, idx: number) => (
+                        <div key={idx} className="mb-3 flex items-start gap-2">
+                          <TrendingUp className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                          <p className="text-gray-300">{trend}</p>
+                        </div>
+                      ))}
                     </div>
-                  )}
-                  <div>
-                    <h5 className="text-white font-semibold mb-4" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>KEY TRENDS</h5>
-                    {session.market_analysis.market_trends.map((trend: string, idx: number) => (
-                      <div key={idx} className="mb-3 flex items-start gap-2">
-                        <TrendingUp className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink0" />
-                        <p className="text-white">{trend}</p>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="audience" className="mt-8">
+                <div className="bg-gray-800/60 backdrop-blur-lg rounded-lg p-8 border border-gray-600/30 shadow-lg">
+                  <h4 className="text-white font-bold text-xl mb-6">Audience Insights</h4>
+                  <div className="space-y-4 text-gray-300">
+                    {session.market_analysis.audience_insights.demographics && (
+                      <div>
+                        <h5 className="text-white font-medium mb-2">Demographics</h5>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          {Object.entries(session.market_analysis.audience_insights.demographics).map(([key, value]: [string, any]) => (
+                            <div key={key}>
+                              <span className="text-gray-400 capitalize">{key}: </span>
+                              <span className="text-gray-300">{value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {session.market_analysis.audience_insights.psychographics && (
+                      <div>
+                        <h5 className="text-white font-medium mb-2">Psychographics</h5>
+                        <p className="text-gray-300">{session.market_analysis.audience_insights.psychographics}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="competitors" className="mt-8">
+                <div className="bg-gray-800/60 backdrop-blur-lg rounded-lg p-8 border border-gray-600/30 shadow-lg">
+                  <h4 className="text-white font-bold text-xl mb-6">Competitor Analysis</h4>
+                  <div className="space-y-4 text-gray-300">
+                    {session.market_analysis.competitors.map((competitor: any, idx: number) => (
+                      <div key={idx} className="border border-white/10 rounded-lg p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <h5 className="text-white font-medium">{competitor.name}</h5>
+                          {competitor.price && (
+                            <Badge variant="outline" className="text-green-400 border-green-400">
+                              {competitor.price}
+                            </Badge>
+                          )}
+                        </div>
+                        {competitor.description && (
+                          <p className="text-gray-300 text-sm mb-2">{competitor.description}</p>
+                        )}
+                        {competitor.features && (
+                          <div className="text-sm">
+                            <span className="text-gray-400">Key Features: </span>
+                            <span className="text-gray-300">{competitor.features}</span>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 </div>
-              </div>
-            </TabsContent>
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <div className="text-center text-gray-400 py-8">
+              Market analysis will appear here once complete...
+            </div>
+          )}
 
-            <TabsContent value="audience" className="mt-8">
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-10 border border-white/20 shadow-xl">
-                <h4 className="text-white font-bold text-xl mb-6" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>AUDIENCE INSIGHTS</h4>
-                <div className="space-y-4 text-white">
-                  {session.market_analysis.audience_insights.demographics && (
-                    <div>
-                      <h5 className="text-purple-300 font-semibold mb-2" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>DEMOGRAPHICS</h5>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        {Object.entries(session.market_analysis.audience_insights.demographics).map(
-                          ([key, value]: [string, any]) => (
-                            <div key={key}>
-                              <span className="text-white italic capitalize" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>{key.toUpperCase()}: </span>
-                              <span className="text-white">{value}</span>
-                            </div>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  {session.market_analysis.audience_insights.psychographics && (
-                    <div>
-                      <h5 className="text-purple-300 font-semibold mb-4" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>PSYCHOGRAPHICS</h5>
-                      <p className="text-white">{session.market_analysis.audience_insights.psychographics}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
+          {!isLoading && session?.market_analysis && (
+            <div className="mt-8 flex justify-end">
+              <Button
+                onClick={continueToScript}
+                disabled={isLoading}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    Continue to Script
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
 
-            <TabsContent value="competitors" className="mt-8">
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-10 border border-white/20 shadow-xl">
-                <h4 className="text-white font-bold text-xl mb-6" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>COMPETITOR ANALYSIS</h4>
-                <div className="space-y-4 text-white">
-                  {session.market_analysis.competitors.map((competitor: any, idx: number) => (
-                    <div key={idx} className="border border-white/20 rounded-lg p-4 transition-all duration-300 hover:bg-purple-900/20 hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20 cursor-pointer group">
-                      <div className="flex items-start justify-between mb-2">
-                        <h5 className="text-purple-300 font-semibold group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>{competitor.name.toUpperCase()}</h5>
-                        {competitor.price && (
-                          <Badge variant="outline" className="text-green-400 border-green-400/60 group-hover:bg-green-400/10 group-hover:border-green-300 transition-all duration-300" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
-                            {competitor.price}
-                          </Badge>
-                        )}
-                      </div>
-                      {competitor.description && (
-                        <p className="text-white text-sm mb-2 group-hover:text-gray-100 transition-colors duration-300">{competitor.description}</p>
-                      )}
-                      {competitor.features && (
-                        <div className="text-sm">
-                          <span className="text-purple-300 italic group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>KEY FEATURES: </span>
-                          <span className="text-white italic group-hover:text-gray-100 transition-colors duration-300">{competitor.features}</span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <div className="text-center text-gray-400 py-8">Market analysis will appear here once complete...</div>
-        )}
-
-        {!isLoading && session?.market_analysis && (
-          <div className="mt-8 flex justify-end">
-            <Button
-              onClick={continueToScript}
-              disabled={isLoading}
-              className="bg-purple-600/90 hover:bg-purple-500 text-white px-8 py-3 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                <>
-                  Continue to Script
-                  <ArrowRight className="ml-3 h-5 w-5" />
-                </>
-              )}
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  </div>
-)
-
-
-  // Step 4 UI: Script Review
+  // STEP 4 UI: Script Review & Feedback
   const renderScriptStep = () => (
     <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-8">
-        <h2 className="text-7xl font-bold text-white mb-4 tracking-tight" style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}>Script Review</h2>
-        <p className="text-lg text-purple-300 font-light" style={{ fontFamily: 'IBM Plex Mono, monospace', fontWeight: 'bold' }}>REVIEW AND REFINE YOUR VIDEO SCRIPT</p>
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-bold text-white mb-3">Script Review</h2>
+        <p className="text-gray-400">Review and refine your video script</p>
       </div>
-
-      <Card className="bg-white/10 backdrop-blur-xl border-white/20 rounded-3xl shadow-2xl">
-        <CardContent className="p-12 space-y-8">
+      
+      <Card className="bg-gray-900/50 backdrop-blur-xl border-gray-600/30">
+        <CardContent className="space-y-8">
           {session?.script ? (
             <>
               {/* Generated Script Display */}
-              <div className="space-y-8">
-                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-10 border border-white/20 shadow-xl transition-all duration-300 hover:bg-purple-900/20 hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20 cursor-pointer group">
-                  <h4 className="text-white font-bold text-xl mb-4 flex items-center group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
-                    <FileText className="w-6 h-6 mr-3 text-purple-400 group-hover:text-purple-300 transition-colors duration-300" />
-                    AUDIO SCRIPT (A-ROLL)
+              <div className="space-y-6">
+                <div className="bg-gray-800/60 backdrop-blur-lg rounded-lg p-8 border border-gray-600/30 shadow-lg">
+                  <h4 className="text-white font-bold text-xl mb-4 flex items-center">
+                    <FileText className="w-6 h-6 mr-3 text-blue-400" />
+                    Audio Script (A-roll)
                   </h4>
-                  <p className="text-white leading-relaxed text-base group-hover:text-gray-100 transition-colors duration-300">{session.script.audio_script}</p>
+                  <p className="text-gray-300 leading-relaxed text-base">
+                    {session.script.audio_script}
+                  </p>
                 </div>
-
-                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-10 border border-white/20 shadow-xl transition-all duration-300 hover:bg-purple-900/20 hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20 cursor-pointer group">
-                  <h4 className="text-white font-bold text-xl mb-4 flex items-center group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
-                    <Video className="w-6 h-6 mr-3 text-purple-400 group-hover:text-purple-300 transition-colors duration-300" />
-                    VIDEO SCRIPT (B-ROLL)
+                
+                <div className="bg-gray-800/60 backdrop-blur-lg rounded-lg p-8 border border-gray-600/30 shadow-lg">
+                  <h4 className="text-white font-bold text-xl mb-4 flex items-center">
+                    <Video className="w-6 h-6 mr-3 text-blue-400" />
+                    Video Script (B-roll)
                   </h4>
-                  <p className="text-white leading-relaxed text-base group-hover:text-gray-100 transition-colors duration-300">{session.script.video_script}</p>
+                  <p className="text-gray-300 leading-relaxed text-base">
+                    {session.script.video_script}
+                  </p>
                 </div>
               </div>
 
               {/* Feedback Section */}
               {session.awaiting_feedback && (
-                <div className="border-t border-gray-700/50 pt-8">
-                  <h4 className="text-white font-bold text-xl mb-6" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>PROVIDE FEEDBACK (OPTIONAL)</h4>
-
+                <div className="border-t border-gray-700 pt-8">
+                  <h4 className="text-white font-bold text-xl mb-6">Provide Feedback (Optional)</h4>
+                  
                   <div className="space-y-6">
                     <Textarea
                       placeholder="Enter your feedback to improve the script, or leave blank to approve as-is..."
                       value={feedback}
                       onChange={(e) => setFeedback(e.target.value)}
-                      className="bg-white/10 backdrop-blur-xl border-purple-400/30 text-white h-32 text-xl px-10 py-6 rounded-3xl focus:border-purple-400/60 focus:ring-2 focus:ring-purple-400/30 transition-all duration-300 shadow-2xl purple-placeholder resize-none"
-                      style={{ 
-                        fontFamily: 'Rubik, sans-serif', 
-                        fontWeight: 'bold',
-                        '--tw-placeholder-opacity': '1'
-                      } as React.CSSProperties}
+                      className="bg-gray-800 border-gray-700 text-white placeholder-gray-500 min-h-[140px] focus:border-blue-500 focus:ring-blue-500 text-base"
                       rows={5}
                     />
-
+                    
                     <div className="flex space-x-4">
                       <Button
                         onClick={submitFeedback}
                         disabled={!feedback.trim() || isLoading}
-                        className="bg-purple-600/90 hover:bg-purple-500 text-white px-6 py-3 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
                       >
                         {isLoading ? (
                           <>
@@ -1064,7 +1028,7 @@ export function VideoGenerationWizard() {
                         onClick={approveScript}
                         disabled={isLoading}
                         variant="outline"
-                        className="border-purple-400/60 text-purple-300 hover:bg-purple-900/20 hover:border-purple-400 px-6 py-3 font-semibold transition-all duration-200"
+                        className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 px-6 py-3 font-semibold transition-all duration-200"
                       >
                         {isLoading ? (
                           <>
@@ -1082,7 +1046,7 @@ export function VideoGenerationWizard() {
             </>
           ) : (
             <div className="text-center py-16">
-              <Loader2 className="w-16 h-16 text-purple-400 mx-auto mb-6 animate-spin" />
+              <Loader2 className="w-16 h-16 text-blue-400 mx-auto mb-6 animate-spin" />
               <h3 className="text-white font-semibold text-xl mb-3">Generating Script...</h3>
               <p className="text-gray-400 text-base">Creating your personalized video script</p>
             </div>
@@ -1091,13 +1055,13 @@ export function VideoGenerationWizard() {
       </Card>
     </div>
   )
-  
+
   // STEP 5 UI: Raw Footage Display
   const renderRawFootageStep = () => (
     <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-8">
-        <h2 className="text-7xl font-bold text-white mb-4 tracking-tight" style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}>Raw Footage Generated</h2>
-        <p className="text-lg text-purple-300 font-light" style={{ fontFamily: 'IBM Plex Mono, monospace', fontWeight: 'bold' }}>REVIEW YOUR A-ROLL AND B-ROLL FOOTAGE BEFORE FINAL PROCESSING</p>
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-bold text-white mb-3">Raw Footage Generated</h2>
+        <p className="text-gray-400">Review your A-roll and B-roll footage before final processing</p>
       </div>
       
       <Card className="bg-gray-900/50 backdrop-blur-xl border-gray-600/30">
@@ -1107,13 +1071,13 @@ export function VideoGenerationWizard() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* A-roll Video */}
                 <div className="space-y-4">
-                  <h4 className="text-white font-bold text-xl mb-4 flex items-center" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
-                    <FileText className="w-6 h-6 mr-3 text-purple-400" />
-                    A-ROLL (AVATAR/VOICEOVER)
+                  <h4 className="text-white font-bold text-xl mb-4 flex items-center">
+                    <FileText className="w-6 h-6 mr-3 text-blue-400" />
+                    A-roll (Avatar/Voiceover)
                     {session?.aroll_url ? (
-                      <span className="ml-2 text-sm text-green-400" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>✓ READY</span>
+                      <span className="ml-2 text-sm text-green-400">✓ Ready</span>
                     ) : (
-                      <span className="ml-2 text-sm text-yellow-400" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>⏳ GENERATING...</span>
+                      <span className="ml-2 text-sm text-yellow-400">⏳ Generating...</span>
                     )}
                   </h4>
                   <div className="bg-gray-800/60 backdrop-blur-lg rounded-lg p-6 border border-gray-600/30 shadow-lg">
@@ -1129,8 +1093,8 @@ export function VideoGenerationWizard() {
                     ) : (
                       <div className="aspect-video bg-gray-700 rounded-lg flex items-center justify-center">
                         <div className="text-center">
-                          <Loader2 className="w-8 h-8 text-purple-400 mx-auto mb-2 animate-spin" />
-                          <p className="text-gray-400 text-sm" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>GENERATING A-ROLL...</p>
+                          <Loader2 className="w-8 h-8 text-blue-400 mx-auto mb-2 animate-spin" />
+                          <p className="text-gray-400 text-sm">Generating A-roll...</p>
                         </div>
                       </div>
                     )}
@@ -1139,13 +1103,13 @@ export function VideoGenerationWizard() {
 
                 {/* B-roll Video */}
                 <div className="space-y-4">
-                  <h4 className="text-white font-bold text-xl mb-4 flex items-center" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
-                    <Video className="w-6 h-6 mr-3 text-purple-400" />
-                    B-ROLL (PRODUCT FOOTAGE)
+                  <h4 className="text-white font-bold text-xl mb-4 flex items-center">
+                    <Video className="w-6 h-6 mr-3 text-blue-400" />
+                    B-roll (Product Footage)
                     {session?.broll_url ? (
-                      <span className="ml-2 text-sm text-green-400" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>✓ READY</span>
+                      <span className="ml-2 text-sm text-green-400">✓ Ready</span>
                     ) : (
-                      <span className="ml-2 text-sm text-yellow-400" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>⏳ GENERATING...</span>
+                      <span className="ml-2 text-sm text-yellow-400">⏳ Generating...</span>
                     )}
                   </h4>
                   <div className="bg-gray-800/60 backdrop-blur-lg rounded-lg p-6 border border-gray-600/30 shadow-lg">
@@ -1161,8 +1125,8 @@ export function VideoGenerationWizard() {
                     ) : (
                       <div className="aspect-video bg-gray-700 rounded-lg flex items-center justify-center">
                         <div className="text-center">
-                          <Loader2 className="w-8 h-8 text-purple-400 mx-auto mb-2 animate-spin" />
-                          <p className="text-gray-400 text-sm" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>GENERATING B-ROLL...</p>
+                          <Loader2 className="w-8 h-8 text-blue-400 mx-auto mb-2 animate-spin" />
+                          <p className="text-gray-400 text-sm">Generating B-roll...</p>
                         </div>
                       </div>
                     )}
@@ -1174,7 +1138,7 @@ export function VideoGenerationWizard() {
                 <Button 
                   onClick={processRawFootage}
                   disabled={isLoading || !session?.aroll_url || !session?.broll_url}
-                  className="bg-purple-600/90 hover:bg-purple-500 text-white px-8 py-4 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <>
@@ -1197,7 +1161,7 @@ export function VideoGenerationWizard() {
             </div>
           ) : (
             <div className="text-center py-16">
-              <Loader2 className="w-16 h-16 text-purple-400 mx-auto mb-6 animate-spin" />
+              <Loader2 className="w-16 h-16 text-blue-400 mx-auto mb-6 animate-spin" />
               <h3 className="text-white font-semibold text-xl mb-3">Generating Raw Footage...</h3>
               <p className="text-gray-400 text-base">Creating your A-roll and B-roll videos</p>
               <div className="mt-4 space-y-2 text-sm">
@@ -1221,8 +1185,7 @@ export function VideoGenerationWizard() {
       const shareUrls = {
         reddit: `https://www.reddit.com/submit?url=${encodeURIComponent(videoUrl || '')}&title=${encodeURIComponent(text)}`,
         twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(videoUrl || '')}`,
-        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(videoUrl || '')}`,
-        youtube: `https://www.youtube.com/upload?title=${encodeURIComponent(text)}&description=${encodeURIComponent(`Check out this AI-generated video ad! ${videoUrl || ''}`)}`
+        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(videoUrl || '')}`
       }
       
       window.open(shareUrls[platform as keyof typeof shareUrls], '_blank')
@@ -1230,9 +1193,9 @@ export function VideoGenerationWizard() {
 
     return (
       <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-8">
-          <h2 className="text-7xl font-bold text-white mb-4 tracking-tight" style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}>Your Video is Ready!</h2>
-          <p className="text-lg text-purple-300 font-light" style={{ fontFamily: 'IBM Plex Mono, monospace', fontWeight: 'bold' }}>YOUR AI-GENERATED VIDEO AD IS COMPLETE AND READY TO SHARE</p>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-white mb-3">Your Video is Ready!</h2>
+          <p className="text-gray-400">Your AI-generated video ad is complete and ready to share</p>
         </div>
         
         <Card className="bg-gray-900/50 backdrop-blur-xl border-gray-600/30">
@@ -1255,10 +1218,10 @@ export function VideoGenerationWizard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Download & Create New */}
                   <div className="space-y-4">
-                    <h3 className="text-white font-semibold text-lg mb-4" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>ACTIONS</h3>
+                    <h3 className="text-white font-semibold text-lg mb-4">Actions</h3>
                     <div className="space-y-3">
                       <Button 
-                        className="w-full bg-purple-600/90 hover:bg-purple-500 text-white px-6 py-3 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
                         onClick={() => window.open(session.final_video_url, '_blank')}
                       >
                         <Download className="w-5 h-5 mr-3" />
@@ -1266,7 +1229,7 @@ export function VideoGenerationWizard() {
                       </Button>
                       <Button 
                         variant="outline"
-                        className="w-full border-purple-400/60 text-purple-300 px-6 py-3 font-semibold transition-all duration-200"
+                        className="w-full border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 px-6 py-3 font-semibold transition-all duration-200"
                         onClick={resetWizard}
                       >
                         Create Another Video
@@ -1276,62 +1239,55 @@ export function VideoGenerationWizard() {
                   
                   {/* Social Media Sharing */}
                   <div className="space-y-4">
-                    <h3 className="text-white font-semibold text-lg mb-4" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>SHARE TO SOCIAL MEDIA</h3>
-                    <div className="flex space-x-4">
-                      <button
+                    <h3 className="text-white font-semibold text-lg mb-4">Share to Social Media</h3>
+                    <div className="space-y-3">
+                      <Button
+                        variant="outline"
+                        className="w-full border-orange-500 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-4 py-3 font-medium transition-all duration-200"
                         onClick={() => shareToSocial('reddit')}
-                        className="w-12 h-12 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
-                        title="Share to Reddit"
                       >
-                        <FaReddit className="w-6 h-6 text-white" />
-                      </button>
-                      <button
+                        Reddit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-4 py-3 font-medium transition-all duration-200"
                         onClick={() => shareToSocial('twitter')}
-                        className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
-                        title="Share to Twitter"
                       >
-                        <FaTwitter className="w-6 h-6 text-white" />
-                      </button>
-                      <button
+                        Twitter
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full border-blue-600 text-blue-400 hover:bg-blue-600/10 hover:border-blue-500 px-4 py-3 font-medium transition-all duration-200"
                         onClick={() => shareToSocial('linkedin')}
-                        className="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
-                        title="Share to LinkedIn"
                       >
-                        <FaLinkedin className="w-6 h-6 text-white" />
-                      </button>
-                      <button
-                        onClick={() => shareToSocial('youtube')}
-                        className="w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
-                        title="Share to YouTube"
-                      >
-                        <FaYoutube className="w-6 h-6 text-white" />
-                      </button>
+                        LinkedIn
+                      </Button>
                     </div>
                   </div>
                 </div>
                 
                 {/* Video Stats */}
                 <div className="bg-gray-800/40 rounded-lg p-6 border border-gray-600/20">
-                  <h4 className="text-white font-semibold text-lg mb-4" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>VIDEO DETAILS</h4>
+                  <h4 className="text-white font-semibold text-lg mb-4">Video Details</h4>
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                     <div className="text-center">
-                      <div className="text-purple-300 font-semibold" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>FORMAT</div>
+                      <div className="text-blue-400 font-semibold">Format</div>
                       <div className="text-gray-300">MP4</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-purple-300 font-semibold" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>QUALITY</div>
+                      <div className="text-blue-400 font-semibold">Quality</div>
                       <div className="text-gray-300">HD 1080p</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-purple-300 font-semibold" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>A-ROLL</div>
+                      <div className="text-blue-400 font-semibold">A-roll</div>
                       <div className="text-gray-300">HeyGen Avatar</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-purple-300 font-semibold" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>B-ROLL</div>
+                      <div className="text-blue-400 font-semibold">B-roll</div>
                       <div className="text-gray-300">Veo 2</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-purple-300 font-semibold" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>PROCESSING</div>
+                      <div className="text-blue-400 font-semibold">Processing</div>
                       <div className="text-gray-300">FFmpeg + GCS</div>
                     </div>
                   </div>
@@ -1339,7 +1295,7 @@ export function VideoGenerationWizard() {
               </div>
             ) : (
               <div className="text-center py-16">
-                <Loader2 className="w-16 h-16 text-purple-400 mx-auto mb-6 animate-spin" />
+                <Loader2 className="w-16 h-16 text-blue-400 mx-auto mb-6 animate-spin" />
                 <h3 className="text-white font-semibold text-xl mb-3">Processing Your Final Video...</h3>
                 <p className="text-gray-400 text-base">Combining A-roll and B-roll footage with smart transitions</p>
                 <div className="mt-4 space-y-2 text-sm">
@@ -1357,26 +1313,27 @@ export function VideoGenerationWizard() {
   }
 
   return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-purple-900 text-white font-sans antialiased flex flex-col relative" style={{ fontFamily: 'Rubik, sans-serif', fontWeight: 'bold' }}>      <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-black text-white font-inter overflow-y-auto antialiased">
+      <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Progress Steps */}
         <div className="mb-16">
-          <div className="flex items-center justify-center space-x-12">
+          <div className="flex items-center justify-center space-x-8">
             {steps.map((step, index) => (
               <div key={step.id} className="flex items-center">
-                <div className={`flex items-center justify-center w-16 h-16 rounded-full transition-all duration-300 shadow-lg ${
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
                   currentStep >= step.id 
-                    ? 'bg-purple-600 text-white shadow-purple-600/30' 
-                    : 'bg-gray-800/60 text-gray-400 border border-gray-700/60'
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-800 text-gray-500'
                 }`}>
                   {currentStep > step.id ? (
-                    <CheckCircle className="w-8 h-8" />
+                    <CheckCircle className="w-5 h-5" />
                   ) : (
-                    <step.icon className="w-8 h-8" />
+                    <step.icon className="w-5 h-5" />
                   )}
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`w-20 h-1 ml-8 transition-all duration-300 rounded-full ${
-                    currentStep > step.id ? 'bg-gradient-to-r from-purple-600 to-purple-500' : 'bg-gray-700/60'
+                  <div className={`w-16 h-px ml-6 transition-all duration-300 ${
+                    currentStep > step.id ? 'bg-blue-600' : 'bg-gray-700'
                   }`} />
                 )}
               </div>

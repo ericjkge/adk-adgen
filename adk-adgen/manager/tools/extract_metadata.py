@@ -1,9 +1,10 @@
-import requests  
+import requests
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+
 
 def extract_metadata(url: str) -> dict:
     """
@@ -21,11 +22,11 @@ def extract_metadata(url: str) -> dict:
         "urls": url,
         "include_images": False,
         "extract_depth": "basic",
-        "format": "markdown"
+        "format": "markdown",
     }
     headers = {
         "Authorization": f"Bearer {TAVILY_API_KEY}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
     response = requests.request("POST", endpoint, json=payload, headers=headers)

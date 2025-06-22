@@ -92,3 +92,24 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom placeholder styling */
+.purple-placeholder::placeholder {
+  color: #c4b5fd !important;
+  opacity: 1 !important;
+}
+
+.purple-placeholder::-webkit-input-placeholder {
+  color: #c4b5fd !important;
+  opacity: 1 !important;
+}
+
+.purple-placeholder::-moz-placeholder {
+  color: #c4b5fd !important;
+  opacity: 1 !important;
+}
+
+.purple-placeholder:-ms-input-placeholder {
+  color: #c4b5fd !important;
+  opacity: 1 !important;
+}

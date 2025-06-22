@@ -1,6 +1,7 @@
 import asyncio
-import requests
 import os
+
+import requests
 from dotenv import load_dotenv
 from google.adk.tools import ToolContext
 from google.genai import types
@@ -21,8 +22,8 @@ async def generate_a_roll(prompt: str, tool_context: ToolContext) -> str:
     """
 
     # Step 1: Get IDs and dimensions from state (assumed to be saved by root after pass from frontend)
-    avatar_id = tool_context.state.get("avatar_id", "Raul_sitting_casualsofawithipad_front")
-    voice_id = tool_context.state.get("voice_id", "beaa640abaa24c32bea33b280d2f5ea3")
+    avatar_id = tool_context.state.get("avatar_id", "Annie_expressive12_public")
+    voice_id = tool_context.state.get("voice_id", "330290724a1b470fb63153f34d4c0183")
     width = tool_context.state.get("width", 1280)
     height = tool_context.state.get("height", 720)
 
@@ -76,23 +77,27 @@ async def generate_a_roll(prompt: str, tool_context: ToolContext) -> str:
                 video = requests.get(video_url)
                 if video.status_code == 200:
                     video_artifact = types.Part(
-                    inline_data=types.Blob(mime_type="video/mp4", data=video.content)
-                )
+                        inline_data=types.Blob(
+                            mime_type="video/mp4", data=video.content
+                        )
+                    )
                 await tool_context.save_artifact("a_roll.mp4", video_artifact)
                 # Save captions if available
                 if caption_url:
                     caption = requests.get(caption_url)
                     if caption.status_code == 200:
                         caption_artifact = types.Part(
-                            inline_data=types.Blob(mime_type="text/x-ass", data=caption.content)
+                            inline_data=types.Blob(
+                                mime_type="text/x-ass", data=caption.content
+                            )
                         )
                         await tool_context.save_artifact(
                             "a_roll_captions.ass", caption_artifact
                         )
                         return f"Video and captions generated successfully. Video URL: {video_url}"
-                    return f"Video generated successfully. Video URL: {video_url}"  
+                    return f"Video generated successfully. Video URL: {video_url}"
                 else:
-                    return  f"Error downloading video {video.status_code}"
+                    return f"Error downloading video {video.status_code}"
             else:
                 return "Error: No video URL in completed response"
         elif status == "failed":

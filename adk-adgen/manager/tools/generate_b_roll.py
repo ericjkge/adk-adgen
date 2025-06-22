@@ -1,12 +1,13 @@
-from google.auth import default
-from google.auth.transport.requests import Request
-from google.genai import types
-import requests
+import asyncio
 import os
+
+import requests
 from dotenv import load_dotenv
 from google.adk.tools import ToolContext
-import asyncio
+from google.auth import default
+from google.auth.transport.requests import Request
 from google.cloud import storage
+from google.genai import types
 
 load_dotenv()
 PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
@@ -16,36 +17,36 @@ OUTPUT_STORAGE_URI = os.getenv("OUTPUT_STORAGE_URI")
 
 
 async def save_video(uri_link: str, tool_context: ToolContext) -> str:
-    try:  
-        if not uri_link.startswith("gs://"):  
-            return "Invalid GCS URI format"  
-          
-        # Remove gs:// prefix and split bucket/object  
-        path = uri_link[5:]  # Remove 'gs://'  
-        bucket_name, object_name = path.split('/', 1)  
-          
-        # Initialize GCS client  
-        client = storage.Client()  
-        bucket = client.bucket(bucket_name)  
-        blob = bucket.blob(object_name)  
-          
-        # Download video data  
-        video_data = blob.download_as_bytes()  
-          
-        # Create artifact part with video data  
-        artifact_part = types.Part(  
-            inline_data=types.Blob(  
-                mime_type='video/mp4',  # Adjust based on actual video format  
-                data=video_data  
-            )  
-        )  
-          
-        # Save as artifact  
-        await tool_context.save_artifact('b_roll.mp4', artifact_part)  
-          
-        return f"Video successfully downloaded and saved as artifact from {uri_link}"  
-          
-    except Exception as e:  
+    try:
+        if not uri_link.startswith("gs://"):
+            return "Invalid GCS URI format"
+
+        # Remove gs:// prefix and split bucket/object
+        path = uri_link[5:]  # Remove 'gs://'
+        bucket_name, object_name = path.split("/", 1)
+
+        # Initialize GCS client
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
+        blob = bucket.blob(object_name)
+
+        # Download video data
+        video_data = blob.download_as_bytes()
+
+        # Create artifact part with video data
+        artifact_part = types.Part(
+            inline_data=types.Blob(
+                mime_type="video/mp4",  # Adjust based on actual video format
+                data=video_data,
+            )
+        )
+
+        # Save as artifact
+        await tool_context.save_artifact("b_roll.mp4", artifact_part)
+
+        return f"Video successfully downloaded and saved as artifact from {uri_link}"
+
+    except Exception as e:
         return f"Failed to download and save video: {str(e)}"
 
 
@@ -68,9 +69,7 @@ async def generate_b_roll(prompt: str, tool_context: ToolContext) -> str:
     creds.refresh(Request())
     access_token = creds.token
 
-    endpoint = (
-        f"https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}:predictLongRunning"
-    )
+    endpoint = f"https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}:predictLongRunning"
 
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -91,10 +90,7 @@ async def generate_b_roll(prompt: str, tool_context: ToolContext) -> str:
     operation = response_data["name"]
     OPERATION_ID = operation.split("/")[-1]
 
-
-    poll_url = (
-        f"https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}:fetchPredictOperation"
-    )
+    poll_url = f"https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}:fetchPredictOperation"
 
     payload2 = {
         "operationName": f"projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}/operations/{OPERATION_ID}"
@@ -113,7 +109,7 @@ async def generate_b_roll(prompt: str, tool_context: ToolContext) -> str:
             if uri_link:
                 # Save to artifacts
                 save_result = await save_video(uri_link, tool_context)
-                
+
                 # Return GCS URI - frontend will convert to public HTTP URL
                 return f"Video generated successfully. Video URL: {uri_link}"
 

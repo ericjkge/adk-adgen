@@ -32,11 +32,11 @@ root_agent = Agent(
     fed back to the wizard frontend, which has strict regex rules about how to handle your responses.
     """,
     sub_agents=[
-        analysis_agent, 
+        analysis_agent,
         market_agent,
-        script_agent, 
+        script_agent,
         a_roll_agent,
         b_roll_agent,
-        processing_agent
-        ]
+        processing_agent,
+    ],
 )

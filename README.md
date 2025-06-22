@@ -1,67 +1,90 @@
-# Project Setup
+# ADK AdGen - AI Video Advertisement Generator
 
-Follow these steps to get started:
+Generate video advertisements from product URLs using Google's ADK framework, HeyGen avatars, and Veo 2.
 
----
+## Features
 
-## 1. Install Dependencies
+- **Product Analysis** - Extracts metadata, pricing, features from URLs
+- **Market Research** - Analyzes competitors and target audience  
+- **AI Script Generation** - Creates audio/video scripts with user feedback
+- **Video Creation** - HeyGen avatar A-roll + Veo 2 product B-roll
+- **Auto Processing** - FFmpeg combination with transitions
+- **Social Sharing** - Direct sharing to Reddit, Twitter, LinkedIn
 
-Ensure you're using **Python 3.9+**. Then install required packages:
+## Prerequisites
+
+- Python 3.9+, Node.js 18+, FFmpeg
+- Google Cloud Project with Vertex AI enabled
+- API Keys: Tavily, HeyGen
+
+## Setup
+
+### 1. Install Dependencies
 
 ```bash
-pip install google-adk python-dotenv google-cloud-storage
+git clone <repository-url>
+cd adk-adgen
+
+# Backend
+pip install -r requirements.txt
+
+# Frontend
+cd frontend && npm install && npm run build
 ```
 
-Install ffmpeg.
+### 2. Configure Environment
 
----
-
-## 2. Set Up Your `.env` File
-
-In the root of your project, create a file named `.env` and add your API keys and config:
+Create `.env` in root directory:
 
 ```env
 GOOGLE_GENAI_USE_VERTEXAI=TRUE
-TAVILY_API_KEY=INSERT_YOUR_TAVILY_API_KEY
-HEYGEN_API_KEY=INSERT_YOUR_HEYGEN_API_KEY
-GOOGLE_CLOUD_PROJECT=INSERT_YOUR_PROJECT_ID
+GOOGLE_CLOUD_PROJECT=your-project-id
 GOOGLE_CLOUD_LOCATION=us-central1
-OUTPUT_STORAGE_URI = INSERT_YOUR_GCS_URI
+OUTPUT_STORAGE_URI=gs://your-bucket-name/
+TAVILY_API_KEY=your-tavily-api-key
+HEYGEN_API_KEY=your-heygen-api-key
 ```
 
----
+### 3. Google Cloud Setup
 
-## 3. Get Your API Keys
-
-### 🔹 Google Cloud Project Setup
 - Go to [Google Cloud Console](https://console.cloud.google.com/)
-- Create a new project (or use an existing one)
-- Set up the [Google CLI](https://cloud.google.com/vertex-ai/generative-ai/docs/start/quickstarts/quickstart-multimodal#setup-local)
-- Authenticate to Google cloud by running:
+- Create a new project (or select an existing one)
+- Install [Google Cloud CLI](https://cloud.google.com/sdk/docs/install)
+- Authenticate to Google Cloud by running:
 
 ```bash
 gcloud auth login
+gcloud auth application-default login
 ```
-- Enable the [Vertex AI API](https://console.cloud.google.com/flows/enableapi?apiid=aiplatform.googleapis.com)
-- Select the project in [Google Cloud Storage](https://cloud.google.com/storage?hl=en)
 
-### 🔹 Tavily API Key
-- Sign up at [tavily.com](https://www.tavily.com/)
-- Copy your API key into `.env` under `TAVILY_API_KEY`
+- Enable the [Vertex AI API](https://console.cloud.google.com/flows/enableapi?apiid=aiplatform.googleapis.com) (required for Veo 2 video generation)
+- Go to [Google Cloud Storage](https://console.cloud.google.com/storage) and:
+  - Click "Create Bucket"
+  - Choose a globally unique bucket name (save this for your `.env` file)
+  - Select "us-central1" region
+  - After creation, go to bucket → Permissions → Add Principal → Enter "allUsers" → Role "Storage Object Viewer"
 
-### 🔹 HeyGen API Key
-- Log into [HeyGen](https://app.heygen.com/)
-- Copy your API key into `.env` under `HEYGEN_API_KEY`
+### 4. Get API Keys
 
-NOTE: Alternatively, just complete Steps 1 and 3 from the [ADK Quickstart Guide](https://google.github.io/adk-docs/get-started/quickstart/#set-up-the-model)
+- **Tavily**: Sign up at [tavily.com](https://www.tavily.com/)
+- **HeyGen**: Get API key from [HeyGen](https://app.heygen.com/) settings
 
---
+## Running
 
-## 4. Running the code
-
-For the backend, navigate to the adk-adgen root folder then run:
+Start both services:
 
 ```bash
+# Terminal 1: Backend
 adk web
+
+# Terminal 2: Frontend  
+cd frontend && npm run dev
 ```
 
+Access at `http://localhost:3000`
+
+## Architecture
+
+- **Backend**: Python ADK agents (Manager → Analysis → Market → Script → A-roll → B-roll → Processing)
+- **Frontend**: Next.js 6-step wizard interface
+- **Storage**: Google Cloud Storage for video assets

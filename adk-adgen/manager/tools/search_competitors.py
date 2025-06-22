@@ -1,9 +1,11 @@
-import requests
 import os
+
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+
 
 def search_competitors(query: str) -> dict:
     """
@@ -11,7 +13,7 @@ def search_competitors(query: str) -> dict:
 
     Args:
         query (str): The search query to find competitors.
-    
+
     Returns:
         dict: A dictionary containing the search results.
     """
@@ -32,11 +34,11 @@ def search_competitors(query: str) -> dict:
         "include_image_descriptions": False,
         "include_domains": [],
         "exclude_domains": [],
-        "country": None
+        "country": None,
     }
     headers = {
         "Authorization": f"Bearer {TAVILY_API_KEY}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
     response = requests.request("POST", url, json=payload, headers=headers)
