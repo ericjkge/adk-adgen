@@ -38,6 +38,7 @@ interface VideoSession {
 }
 
 export function VideoGenerationWizard() {
+  const USER_ID = "user_123" // Static user ID for demo purposes
   const [currentStep, setCurrentStep] = useState(1)
   const [productUrl, setProductUrl] = useState("")
   const [session, setSession] = useState<VideoSession | null>(null)
@@ -53,6 +54,7 @@ export function VideoGenerationWizard() {
     { id: 6, name: "Final Video", icon: CheckCircle }
   ]
 
+  // STEP 1: Product URL Analysis & Metadata Extraction
   const startGeneration = async () => {
     if (!productUrl.trim()) return
     
@@ -60,7 +62,7 @@ export function VideoGenerationWizard() {
     
     try {
       // Step 1: Create a session for the manager agent
-      const sessionResponse = await fetch("/api/adk/apps/manager/users/user_123/sessions", {
+      const sessionResponse = await fetch(`/api/adk/apps/manager/users/${USER_ID}/sessions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -82,7 +84,7 @@ export function VideoGenerationWizard() {
         },
         body: JSON.stringify({
           appName: "manager",
-          userId: "user_123", 
+          userId: USER_ID, 
           sessionId: sessionData.id,
           newMessage: {
             role: "user",
@@ -130,7 +132,7 @@ export function VideoGenerationWizard() {
       if (extractedMetadata) {
         setSession({
           session_id: sessionData.id,
-          user_id: "user_123",
+          user_id: USER_ID,
           status: "processing",
           step: "extraction_complete",
           metadata: extractedMetadata
@@ -140,7 +142,7 @@ export function VideoGenerationWizard() {
         // Fallback to mock data if extraction failed
         setSession({
           session_id: sessionData.id,
-          user_id: "user_123", 
+          user_id: USER_ID, 
           status: "processing",
           step: "extraction",
           metadata: {
@@ -162,10 +164,11 @@ export function VideoGenerationWizard() {
       setIsLoading(false)
       
       // Show error to user
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}. Please check the console for details.`)
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}.`)
     }
   }
 
+  // STEP 2: Market Research & Competitor Analysis
   const continueToMarketAnalysis = async () => {
     if (!session?.session_id || !session?.metadata) return
     
@@ -180,7 +183,7 @@ export function VideoGenerationWizard() {
         },
         body: JSON.stringify({
           appName: "manager",
-          userId: "user_123", 
+          userId: USER_ID, 
           sessionId: session.session_id,
           newMessage: {
             role: "user",
@@ -275,10 +278,11 @@ export function VideoGenerationWizard() {
       setIsLoading(false)
       
       // Show error to user
-      alert(`Error loading market analysis: ${error instanceof Error ? error.message : 'Unknown error'}. Please check the console for details.`)
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}.`)
     }
   }
 
+  // STEP 3: AI Script Generation
   const continueToScript = async () => {
     if (!session?.session_id || !session?.metadata || !session?.market_analysis) return
     
@@ -293,7 +297,7 @@ export function VideoGenerationWizard() {
         },
         body: JSON.stringify({
           appName: "manager",
-          userId: "user_123", 
+          userId: USER_ID, 
           sessionId: session.session_id,
           newMessage: {
             role: "user",
@@ -362,10 +366,11 @@ export function VideoGenerationWizard() {
       setIsLoading(false)
       
       // Show error to user
-      alert(`Error generating script: ${error instanceof Error ? error.message : 'Unknown error'}. Please check the console for details.`)
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}.`)
     }
   }
 
+  // STEP 3B: Script Refinement Based on User Feedback
   const submitFeedback = async () => {
     if (!session?.session_id || !feedback.trim()) return
     
@@ -380,7 +385,7 @@ export function VideoGenerationWizard() {
         },
         body: JSON.stringify({
           appName: "manager",
-          userId: "user_123", 
+          userId: USER_ID, 
           sessionId: session.session_id,
           newMessage: {
             role: "user",
@@ -439,10 +444,11 @@ export function VideoGenerationWizard() {
     } catch (error) {
       setIsLoading(false)
       
-      alert(`Error refining script: ${error instanceof Error ? error.message : 'Unknown error'}. Please check the console for details.`)
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}.`)
     }
   }
 
+  // STEP 4: A-roll & B-roll Video Generation
   const approveScript = async () => {
     if (!session?.session_id || !session?.script) return
     
@@ -452,59 +458,51 @@ export function VideoGenerationWizard() {
     setCurrentStep(5)
     
     try {
-      // TEST MODE: Set to true to use hardcoded A-roll URL, false to generate new A-roll
-      const TEST_MODE = false // DISABLED TEST MODE - WILL GENERATE NEW A-ROLL WITH HEYGEN
-      const HARDCODED_AROLL_URL = "https://files2.heygen.ai/aws_pacific/avatar_tmp/83aafa8212a04b44b6f4add876504b4a/7a8e23e11cf64a38af9e4c19fea1e80a.mp4?Expires=1751137976&Signature=EYWKVpS9WgeGhVKLUzozp1yOwlPuSXf7xHYva5b3Wc4ARU5QZaQRERIzipf1YZvntc40kwVqdY~S9fMQIYkxBAulXLRpzZ11sX2SdknGHhesdEE-LX7l5Rj0WhdAd153zOwt-8thKzIhnQ9g0xuHWo1tned~d80wCk4y~G9KIO6p9njIJ4GSPppkjjIOMJZYue3HUFGbyDlyJ1FE7jzl9v~kGmxc5gZkxxqx8yCUxO-l28aRgSWG6~5TV~QMsyJn3RO7TsmQy20xUKk~DSU2A2spqo3IT3c-tgKw-p~LZEnTro29Mj5u6fxWLJO66xR2fhzIQPk-XLZ6lvYB3M~Uug__&Key-Pair-Id=K38HBHX5LX3X2H" // Real HeyGen URL from successful generation
-      
       let arollUrl = null
       
-      if (TEST_MODE && HARDCODED_AROLL_URL) {
-        arollUrl = HARDCODED_AROLL_URL
-      } else {
-        // Generate new A-roll video
-        const arollResponse = await fetch("/api/adk/run", {
-          method: "POST", 
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            appName: "manager",
-            userId: "user_123", 
-            sessionId: session.session_id,
-            newMessage: {
-              role: "user",
-              parts: [{
-                text: `Run aroll to generate avatar video using this audio script: ${session.script.audio_script}`
-              }]
-            }
-          }),
-        })
-        
-        if (!arollResponse.ok) {
-          throw new Error(`Failed to call A-roll agent: ${arollResponse.status}`)
-        }
-        
-        const arollEvents = await arollResponse.json()
-        
-        // Extract A-roll URL from A-roll agent response
-        for (const event of arollEvents) {
-          if (event.content && event.content.parts) {
-            for (const part of event.content.parts) {
-              if (part.text) {
-                // Look for A-roll URL in standard format
-                const urlMatch = part.text.match(/Video URL:\s*(https?:\/\/[^\s]+)/);
-                if (urlMatch) {
-                  arollUrl = urlMatch[1];
-                  break;
-                }
+      // Step 4A: Generate A-roll (Avatar/Voiceover) video
+      const arollResponse = await fetch("/api/adk/run", {
+        method: "POST", 
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appName: "manager",
+          userId: USER_ID, 
+          sessionId: session.session_id,
+          newMessage: {
+            role: "user",
+            parts: [{
+              text: `Run aroll to generate avatar video using this audio script: ${session.script.audio_script}`
+            }]
+          }
+        }),
+      })
+      
+      if (!arollResponse.ok) {
+        throw new Error(`Failed to call A-roll agent: ${arollResponse.status}`)
+      }
+      
+      const arollEvents = await arollResponse.json()
+      
+      // Extract A-roll URL from A-roll agent response
+      for (const event of arollEvents) {
+        if (event.content && event.content.parts) {
+          for (const part of event.content.parts) {
+            if (part.text) {
+              // Look for A-roll URL in standard format
+              const urlMatch = part.text.match(/Video URL:\s*(https?:\/\/[^\s]+)/);
+              if (urlMatch) {
+                arollUrl = urlMatch[1];
+                break;
               }
             }
           }
-          if (arollUrl) break;
         }
+        if (arollUrl) break;
       }
       
-      // Call B-roll agent
+      // Step 4B: Generate B-roll (Product Footage) video
       const brollResponse = await fetch("/api/adk/run", {
         method: "POST", 
         headers: {
@@ -512,7 +510,7 @@ export function VideoGenerationWizard() {
         },
         body: JSON.stringify({
           appName: "manager",
-          userId: "user_123", 
+          userId: USER_ID, 
           sessionId: session.session_id,
           newMessage: {
             role: "user",
@@ -538,17 +536,17 @@ export function VideoGenerationWizard() {
             if (part.text) {
               // Look for B-roll URL in standard format (supports both https and gs:// URLs)
               const urlMatch = part.text.match(/Video URL:\s*((?:https?|gs):\/\/[^\s]+)/);
-                if (urlMatch) {
-                  const rawUrl = urlMatch[1];
-                  
-                  // Convert GCS URI to public HTTP URL since bucket is now public
-                  if (rawUrl.startsWith('gs://')) {
-                    brollUrl = rawUrl.replace('gs://', 'https://storage.googleapis.com/');
-                  } else {
-                    brollUrl = rawUrl;
-                  }
-                  break;
+              if (urlMatch) {
+                const rawUrl = urlMatch[1];
+                
+                // Convert GCS URI to public HTTP URL since bucket is now public
+                if (rawUrl.startsWith('gs://')) {
+                  brollUrl = rawUrl.replace('gs://', 'https://storage.googleapis.com/');
+                } else {
+                  brollUrl = rawUrl;
                 }
+                break;
+              }
             }
           }
         }
@@ -577,7 +575,86 @@ export function VideoGenerationWizard() {
     } catch (error) {
       setIsLoading(false)
       
-      alert(`Error generating B-roll footage: ${error instanceof Error ? error.message : 'Unknown error'}. Please check the console for details.`)
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}.`)
+    }
+  }
+
+  // STEP 5: Final Video Processing & Combination
+  const processRawFootage = async () => {
+    if (!session?.session_id || !session?.aroll_url || !session?.broll_url) return
+    
+    setIsLoading(true)
+    
+    try {
+      // Call the manager agent to run processing agent
+      const runResponse = await fetch("/api/adk/run", {
+        method: "POST", 
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appName: "manager",
+          userId: USER_ID, 
+          sessionId: session.session_id,
+          newMessage: {
+            role: "user",
+            parts: [{
+              text: `Run processing agent to combine A-roll and B-roll into final video`
+            }]
+          }
+        }),
+      })
+      
+      if (!runResponse.ok) {
+        throw new Error(`Failed to call manager agent: ${runResponse.status}`)
+      }
+      
+      const events = await runResponse.json()
+      
+      // Extract final video URL from processing agent response
+      let finalVideoUrl = null
+      
+      for (const event of events) {
+        if (event.content && event.content.parts) {
+          for (const part of event.content.parts) {
+            if (part.text) {
+              // Look for final video URL in standard format (supports both https and gs:// URLs)
+              const urlMatch = part.text.match(/Video URL:\s*((?:https?|gs):\/\/[^\s]+)/);
+              if (urlMatch) {
+                const rawUrl = urlMatch[1];
+                
+                // Convert GCS URI to public HTTP URL since bucket is now public
+                if (rawUrl.startsWith('gs://')) {
+                  finalVideoUrl = rawUrl.replace('gs://', 'https://storage.googleapis.com/');
+                } else {
+                  finalVideoUrl = rawUrl;
+                }
+                break;
+              }
+            }
+          }
+        }
+        if (finalVideoUrl) break;
+      }
+      
+      if (finalVideoUrl) {
+        setSession(prev => prev ? {
+          ...prev,
+          final_video_url: finalVideoUrl
+        } : null)
+      } else {
+        setSession(prev => prev ? {
+          ...prev,
+          final_video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+        } : null)
+      }
+      
+      setCurrentStep(6)
+      setIsLoading(false)
+    } catch (error) {
+      setIsLoading(false)
+      
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}.`)
     }
   }
 
@@ -589,7 +666,7 @@ export function VideoGenerationWizard() {
     setFeedback("")
   }
 
-  // Step 1: URL Input
+  // STEP 1 UI: URL Input
   const renderInputStep = () => (
     <div className="max-w-xl mx-auto">
       <div className="text-center mb-12">
@@ -627,7 +704,7 @@ export function VideoGenerationWizard() {
     </div>
   )
 
-  // Step 2: Product Information
+  // STEP 2 UI: Product Information Display
   const renderProductInfoStep = () => (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-12">
@@ -739,7 +816,7 @@ export function VideoGenerationWizard() {
     </div>
   )
 
-  // Step 3: Market Analysis
+  // STEP 3 UI: Market Analysis Display
   const renderMarketAnalysisStep = () => (
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-12">
@@ -883,7 +960,7 @@ export function VideoGenerationWizard() {
     </div>
   )
 
-  // Step 4: Script Review
+  // STEP 4 UI: Script Review & Feedback
   const renderScriptStep = () => (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-12">
@@ -979,86 +1056,7 @@ export function VideoGenerationWizard() {
     </div>
   )
 
-  // Add function to process raw footage into final video
-  const processRawFootage = async () => {
-    if (!session?.session_id || !session?.aroll_url || !session?.broll_url) return
-    
-    setIsLoading(true)
-    
-    try {
-      // Call the manager agent to run processing agent
-      const runResponse = await fetch("/api/adk/run", {
-        method: "POST", 
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          appName: "manager",
-          userId: "user_123", 
-          sessionId: session.session_id,
-          newMessage: {
-            role: "user",
-            parts: [{
-              text: `Run processing agent to combine A-roll and B-roll into final video`
-            }]
-          }
-        }),
-      })
-      
-      if (!runResponse.ok) {
-        throw new Error(`Failed to call manager agent: ${runResponse.status}`)
-      }
-      
-      const events = await runResponse.json()
-      
-      // Extract final video URL from processing agent response
-      let finalVideoUrl = null
-      
-      for (const event of events) {
-        if (event.content && event.content.parts) {
-          for (const part of event.content.parts) {
-            if (part.text) {
-              // Look for final video URL in standard format (supports both https and gs:// URLs)
-              const urlMatch = part.text.match(/Video URL:\s*((?:https?|gs):\/\/[^\s]+)/);
-              if (urlMatch) {
-                const rawUrl = urlMatch[1];
-                
-                // Convert GCS URI to public HTTP URL since bucket is now public
-                if (rawUrl.startsWith('gs://')) {
-                  finalVideoUrl = rawUrl.replace('gs://', 'https://storage.googleapis.com/');
-                } else {
-                  finalVideoUrl = rawUrl;
-                }
-                break;
-              }
-            }
-          }
-        }
-        if (finalVideoUrl) break;
-      }
-      
-      if (finalVideoUrl) {
-        setSession(prev => prev ? {
-          ...prev,
-          final_video_url: finalVideoUrl
-        } : null)
-      } else {
-        setSession(prev => prev ? {
-          ...prev,
-          final_video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
-        } : null)
-      }
-      
-      setCurrentStep(6)
-      setIsLoading(false)
-    } catch (error) {
-      setIsLoading(false)
-      
-      alert(`Error processing raw footage: ${error instanceof Error ? error.message : 'Unknown error'}. Please check the console for details.`)
-    }
-  }
-
-  // Step 5: Raw Footage
+  // STEP 5 UI: Raw Footage Display
   const renderRawFootageStep = () => (
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-12">
@@ -1167,9 +1165,9 @@ export function VideoGenerationWizard() {
               <h3 className="text-white font-semibold text-xl mb-3">Generating Raw Footage...</h3>
               <p className="text-gray-400 text-base">Creating your A-roll and B-roll videos</p>
               <div className="mt-4 space-y-2 text-sm">
-                <p className="text-gray-500">🎭 A-roll: Generating avatar video using HeyGen</p>
-                <p className="text-gray-500">🎬 B-roll: Generating product video using Veo 2</p>
-                <p className="text-gray-500 mt-3">⏱️ Total time: ~3-6 minutes</p>
+                <p className="text-gray-500">A-roll: Generating avatar video using HeyGen</p>
+                <p className="text-gray-500">B-roll: Generating product video using Veo 2</p>
+                <p className="text-gray-500 mt-3">Total time: ~3-6 minutes</p>
               </div>
             </div>
           )}
@@ -1178,28 +1176,19 @@ export function VideoGenerationWizard() {
     </div>
   )
 
-  // Step 6: Final Video Result with Social Media Sharing
+  // STEP 6 UI: Final Video Result with Social Media Sharing
   const renderFinalVideoStep = () => {
     const shareToSocial = (platform: string) => {
       const videoUrl = session?.final_video_url
       const text = `Check out this AI-generated video ad I just created!`
       
       const shareUrls = {
-        instagram: `https://www.instagram.com/`, // Instagram doesn't support direct URL sharing
-        tiktok: `https://www.tiktok.com/upload`, // TikTok upload page
         reddit: `https://www.reddit.com/submit?url=${encodeURIComponent(videoUrl || '')}&title=${encodeURIComponent(text)}`,
-        twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(videoUrl || '')}`
+        twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(videoUrl || '')}`,
+        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(videoUrl || '')}`
       }
       
-      if (platform === 'instagram' || platform === 'tiktok') {
-        // For Instagram and TikTok, we'll download the video first
-        if (videoUrl) {
-          window.open(videoUrl, '_blank')
-          alert(`Video opened in new tab. Download it and then upload to ${platform.charAt(0).toUpperCase() + platform.slice(1)}!`)
-        }
-      } else {
-        window.open(shareUrls[platform as keyof typeof shareUrls], '_blank')
-      }
+      window.open(shareUrls[platform as keyof typeof shareUrls], '_blank')
     }
 
     return (
@@ -1251,43 +1240,29 @@ export function VideoGenerationWizard() {
                   {/* Social Media Sharing */}
                   <div className="space-y-4">
                     <h3 className="text-white font-semibold text-lg mb-4">Share to Social Media</h3>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-3">
                       <Button
                         variant="outline"
-                        className="border-pink-500 text-pink-400 hover:bg-pink-500/10 hover:border-pink-400 px-4 py-3 font-medium transition-all duration-200"
-                        onClick={() => shareToSocial('instagram')}
-                      >
-                        Instagram
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="border-black text-gray-300 hover:bg-gray-800 hover:border-gray-500 px-4 py-3 font-medium transition-all duration-200"
-                        onClick={() => shareToSocial('tiktok')}
-                      >
-                        TikTok
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="border-orange-500 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-4 py-3 font-medium transition-all duration-200"
+                        className="w-full border-orange-500 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-4 py-3 font-medium transition-all duration-200"
                         onClick={() => shareToSocial('reddit')}
                       >
                         Reddit
                       </Button>
                       <Button
                         variant="outline"
-                        className="border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-4 py-3 font-medium transition-all duration-200"
+                        className="w-full border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-4 py-3 font-medium transition-all duration-200"
                         onClick={() => shareToSocial('twitter')}
                       >
                         Twitter
                       </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full border-blue-600 text-blue-400 hover:bg-blue-600/10 hover:border-blue-500 px-4 py-3 font-medium transition-all duration-200"
+                        onClick={() => shareToSocial('linkedin')}
+                      >
+                        LinkedIn
+                      </Button>
                     </div>
-                    <Button
-                      variant="outline"
-                      className="w-full border-blue-600 text-blue-400 hover:bg-blue-600/10 hover:border-blue-500 px-4 py-3 font-medium transition-all duration-200"
-                      onClick={() => shareToSocial('linkedin')}
-                    >
-                      LinkedIn
-                    </Button>
                   </div>
                 </div>
                 
