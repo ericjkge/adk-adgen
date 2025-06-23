@@ -34,7 +34,7 @@ cd frontend && npm install && npm run build
 
 ### 2. Configure Environment
 
-Create `.env` in root directory:
+Change `.env.example` into `.env` in adk-agent directory:
 
 ```env
 GOOGLE_GENAI_USE_VERTEXAI=TRUE
@@ -69,7 +69,49 @@ gcloud auth application-default login
 - **Tavily**: Sign up at [tavily.com](https://www.tavily.com/)
 - **HeyGen**: Get API key from [HeyGen](https://app.heygen.com/) settings
 
-## Running
+### 5. Configure Frontend API Routes
+
+The video generation wizard supports three deployment modes. Edit `frontend/components/video-generation-wizard.tsx`:
+
+#### **Local Development**
+For running locally with Next.js API routes:
+```javascript
+// Uncomment LOCAL routes:
+const sessionResponse = await fetch(`/api/adk/apps/manager/users/${USER_ID}/sessions`, {
+const runResponse = await fetch("/api/adk/run", {
+
+// Comment out CLOUD and DOCKER routes:
+// CLOUD: const sessionResponse = await fetch(`https://vibe-backend-75799208947.us-central1.run.app/apps/manager/users/${USER_ID}/sessions`, {
+// DOCKER: const sessionResponse = await fetch(`http://localhost:8080/apps/manager/users/${USER_ID}/sessions`, {
+```
+
+#### **Cloud Deployment (Default - Vercel + Cloud Run)**
+For deploying frontend to Vercel with cloud backend:
+```javascript
+// Uncomment CLOUD routes:
+const sessionResponse = await fetch(`https://vibe-backend-75799208947.us-central1.run.app/apps/manager/users/${USER_ID}/sessions`, {
+const runResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
+
+// Comment out LOCAL and DOCKER routes:
+// LOCAL: const sessionResponse = await fetch(`/api/adk/apps/manager/users/${USER_ID}/sessions`, {
+// DOCKER: const sessionResponse = await fetch(`http://localhost:8080/apps/manager/users/${USER_ID}/sessions`, {
+```
+
+#### **Docker Development**
+For running both frontend and backend in Docker:
+```javascript
+// Uncomment DOCKER routes:
+const sessionResponse = await fetch(`http://localhost:8080/apps/manager/users/${USER_ID}/sessions`, {
+const runResponse = await fetch("http://localhost:8080/run", {
+
+// Comment out LOCAL and CLOUD routes:
+// LOCAL: const sessionResponse = await fetch(`/api/adk/apps/manager/users/${USER_ID}/sessions`, {
+// CLOUD: const sessionResponse = await fetch(`https://vibe-backend-75799208947.us-central1.run.app/run`, {
+```
+
+**Note**: Update all 8 fetch calls in the file (session creation + 7 agent runs) to match your chosen deployment mode.
+
+## Running (Local Development)
 
 Start both services:
 

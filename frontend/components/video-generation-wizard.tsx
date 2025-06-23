@@ -103,9 +103,9 @@ export function VideoGenerationWizard() {
     
     try {
       // Step 1: Create a session for the manager agent
-      const sessionResponse = await fetch(`/api/adk/apps/manager/users/${USER_ID}/sessions`, {
+      const sessionResponse = await fetch(`https://vibe-backend-75799208947.us-central1.run.app/apps/manager/users/${USER_ID}/sessions`, {
+      // LOCAL: const sessionResponse = await fetch(`/api/adk/apps/manager/users/${USER_ID}/sessions`, {
       // DOCKER: const sessionResponse = await fetch(`http://localhost:8080/apps/manager/users/${USER_ID}/sessions`, {
-      // CLOUD: const sessionResponse = await fetch(`https://vibe-backend-75799208947.us-central1.run.app/apps/manager/users/${USER_ID}/sessions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -120,9 +120,9 @@ export function VideoGenerationWizard() {
       const sessionData = await sessionResponse.json()
       
       // Step 2: Call the manager agent to run analysis agent (extraction + save)
-      const runResponse = await fetch("/api/adk/run", {
+      const runResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
+      // LOCAL: const runResponse = await fetch("/api/adk/run", {
       // DOCKER: const runResponse = await fetch("http://localhost:8080/run", {
-      // CLOUD: const runResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
         method: "POST", 
         headers: {
           "Content-Type": "application/json",
@@ -215,9 +215,9 @@ export function VideoGenerationWizard() {
     
     try {
       // Call the manager agent to run market agent
-      const runResponse = await fetch("/api/adk/run", {
+      const runResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
+      // LOCAL: const runResponse = await fetch("/api/adk/run", {
       // DOCKER: const runResponse = await fetch("http://localhost:8080/run", {
-      // CLOUD: const runResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
         method: "POST", 
         headers: {
           "Content-Type": "application/json",
@@ -301,9 +301,9 @@ export function VideoGenerationWizard() {
     
     try {
       // Call the manager agent to run script agent
-      const runResponse = await fetch("/api/adk/run", {
+      const runResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
+      // LOCAL: const runResponse = await fetch("/api/adk/run", {
       // DOCKER: const runResponse = await fetch("http://localhost:8080/run", {
-      // CLOUD: const runResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
         method: "POST", 
         headers: {
           "Content-Type": "application/json",
@@ -389,9 +389,9 @@ export function VideoGenerationWizard() {
     
     try {
       // Call the manager agent to run script agent with feedback
-      const runResponse = await fetch("/api/adk/run", {
+      const runResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
+      // LOCAL: const runResponse = await fetch("/api/adk/run", {
       // DOCKER: const runResponse = await fetch("http://localhost:8080/run", {
-      // CLOUD: const runResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
         method: "POST", 
         headers: {
           "Content-Type": "application/json",
@@ -474,9 +474,9 @@ export function VideoGenerationWizard() {
       let arollUrl = null
       
       // Step 4A: Generate A-roll (Avatar/Voiceover) video
-      const arollResponse = await fetch("/api/adk/run", {
+      const arollResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
+      // LOCAL: const arollResponse = await fetch("/api/adk/run", {
       // DOCKER: const arollResponse = await fetch("http://localhost:8080/run", {
-      // CLOUD: const arollResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
         method: "POST", 
         headers: {
           "Content-Type": "application/json",
@@ -518,9 +518,9 @@ export function VideoGenerationWizard() {
       }
       
       // Step 4B: Generate B-roll (Product Footage) video
-      const brollResponse = await fetch("/api/adk/run", {
+      const brollResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
+      // LOCAL: const brollResponse = await fetch("/api/adk/run", {
       // DOCKER: const brollResponse = await fetch("http://localhost:8080/run", {
-      // CLOUD: const brollResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
         method: "POST", 
         headers: {
           "Content-Type": "application/json",
@@ -604,9 +604,9 @@ export function VideoGenerationWizard() {
     
     try {
       // Call the manager agent to run processing agent
-      const runResponse = await fetch("/api/adk/run", {
+      const runResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
+      // LOCAL: const runResponse = await fetch("/api/adk/run", {
       // DOCKER: const runResponse = await fetch("http://localhost:8080/run", {
-      // CLOUD: const runResponse = await fetch("https://vibe-backend-75799208947.us-central1.run.app/run", {
         method: "POST", 
         headers: {
           "Content-Type": "application/json",
