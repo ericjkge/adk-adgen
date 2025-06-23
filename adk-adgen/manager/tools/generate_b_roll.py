@@ -111,7 +111,7 @@ async def generate_b_roll(prompt: str, tool_context: ToolContext) -> str:
                 save_result = await save_video(uri_link, tool_context)
 
                 # Return GCS URI - frontend will convert to public HTTP URL
-                return f"Video generated successfully. Video URL: {uri_link}"
+                return f"Video generated successfully. B-roll Video URL: {uri_link}"
 
         await asyncio.sleep(10)
 

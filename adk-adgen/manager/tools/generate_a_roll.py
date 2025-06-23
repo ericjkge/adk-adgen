@@ -94,8 +94,8 @@ async def generate_a_roll(prompt: str, tool_context: ToolContext) -> str:
                         await tool_context.save_artifact(
                             "a_roll_captions.ass", caption_artifact
                         )
-                        return f"Video and captions generated successfully. Video URL: {video_url}"
-                    return f"Video generated successfully. Video URL: {video_url}"
+                        return f"Video and captions generated successfully. A-roll Video URL: {video_url}"
+                    return f"Video generated successfully. A-roll Video URL: {video_url}"
                 else:
                     return f"Error downloading video {video.status_code}"
             else:

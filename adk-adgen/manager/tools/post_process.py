@@ -163,7 +163,7 @@ async def post_process(tool_context: ToolContext) -> str:
             # Upload to GCS for public access
             gcs_uri = await upload_to_gcs(out_path, tool_context)
             if gcs_uri:
-                return f"Video processed: A-roll ({a_duration:.1f}s) and B-roll ({b_duration:.1f}s) alternated dynamically. Video URL: {gcs_uri}"
+                return f"Video processed: A-roll ({a_duration:.1f}s) and B-roll ({b_duration:.1f}s) alternated dynamically. Final Video URL: {gcs_uri}"
             else:
                 return f"Video processed: A-roll ({a_duration:.1f}s) and B-roll ({b_duration:.1f}s) alternated dynamically. (GCS upload failed)"
 

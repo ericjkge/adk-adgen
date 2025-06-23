@@ -494,7 +494,7 @@ export function VideoGenerationWizard() {
           for (const part of event.content.parts) {
             if (part.text) {
               // Look for A-roll URL in standard format
-              const urlMatch = part.text.match(/Video URL:\s*(https?:\/\/[^\s]+)/);
+                              const urlMatch = part.text.match(/A-roll Video URL:\s*(https?:\/\/[^\s]+)/);
               if (urlMatch) {
                 arollUrl = urlMatch[1];
                 break;
@@ -538,7 +538,7 @@ export function VideoGenerationWizard() {
           for (const part of event.content.parts) {
             if (part.text) {
               // Look for B-roll URL in standard format (supports both https and gs:// URLs)
-              const urlMatch = part.text.match(/Video URL:\s*((?:https?|gs):\/\/[^\s]+)/);
+                              const urlMatch = part.text.match(/B-roll Video URL:\s*((?:https?|gs):\/\/[^\s]+)/);
               if (urlMatch) {
                 const rawUrl = urlMatch[1];
                 
@@ -622,7 +622,7 @@ export function VideoGenerationWizard() {
           for (const part of event.content.parts) {
             if (part.text) {
               // Look for final video URL in standard format (supports both https and gs:// URLs)
-              const urlMatch = part.text.match(/Video URL:\s*((?:https?|gs):\/\/[^\s]+)/);
+                              const urlMatch = part.text.match(/Final Video URL:\s*((?:https?|gs):\/\/[^\s]+)/);
               if (urlMatch) {
                 const rawUrl = urlMatch[1];
                 
@@ -943,7 +943,7 @@ export function VideoGenerationWizard() {
                     <h5 className="text-white font-semibold mb-4" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>KEY TRENDS</h5>
                     {session.market_analysis.market_trends.map((trend: string, idx: number) => (
                       <div key={idx} className="mb-3 flex items-start gap-2">
-                        <TrendingUp className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink0" />
+                        <TrendingUp className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0" />
                         <p className="text-white">{trend}</p>
                       </div>
                     ))}
