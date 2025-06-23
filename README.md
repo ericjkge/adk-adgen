@@ -74,11 +74,11 @@ gcloud auth application-default login
 Start both services:
 
 ```bash
-# Terminal 1: Backend
-adk web
+# Terminal 1: Backend (adk-adgen folder)
+adk api_server
 
-# Terminal 2: Frontend  
-cd frontend && npm run dev
+# Terminal 2: Frontend (frontend folder)
+npm run dev
 ```
 
 Access at `http://localhost:3000`
